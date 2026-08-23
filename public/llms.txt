@@ -1,0 +1,12 @@
+# 1980 Burguer
+
+> Hamburgueria com cardápio digital, pedidos online, entrega e pagamento por Pix ou cartão.
+
+O site reúne o cardápio digital da 1980 Burguer, onde o cliente monta o pedido,
+informa o endereço, calcula a taxa de entrega e paga online. As demais áreas do
+sistema são de uso interno da loja (PDV, cozinha, financeiro) e exigem login.
+
+## Pages
+
+- [Início](/): Página inicial da 1980 Burguer.
+- [Cardápio digital](/cardapio): Lanches, bebidas e porções com preços, pedido e pagamento online.
