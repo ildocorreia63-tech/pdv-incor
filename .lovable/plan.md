@@ -59,3 +59,4 @@ Garantir que o sistema está pronto para produção.
 | **Mobile** | PWA Manifest & Service Workers | Garantir funcionamento offline básico e instalação |
 
 comforme vai clicando os de traz vai desaparecendo
+opçao de aplicar modo escuro
