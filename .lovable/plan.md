@@ -210,3 +210,4 @@ O sistema deve estar:
 - Com excelente UX em mobile
 - Visualmente consistente em todos os dispositivos
 - Pronto para produção profissional
+- Load the security issues from the scan results and fix the selected issues.
