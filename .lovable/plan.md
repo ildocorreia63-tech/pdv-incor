@@ -62,3 +62,4 @@ comforme vai clicando os de traz vai desaparecendo
 opçao de aplicar modo escuro
 mplementação do modo escuro (Dark Mode)
 siga
+sim implementação de Dark Mode).
