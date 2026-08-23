@@ -311,52 +311,63 @@ export default function Home() {
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 gap-3">
-        <Card
-          role="button"
-          tabIndex={0}
-          onClick={() => nav(`/pedidos?period=${period}`)}
-          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && nav(`/pedidos?period=${period}`)}
-          className="p-4 shadow-card-retro border-l-4 border-l-success cursor-pointer hover:shadow-md active:scale-[0.98] transition"
-        >
-          <div className="flex items-center gap-2 text-success">
-            <TrendingUp className="h-4 w-4" />
-            <span className="text-[11px] font-semibold uppercase">Vendas</span>
-          </div>
-          <p className="mt-1 font-display text-2xl">{formatBRL(stats.sales)}</p>
-          <p className="text-[11px] text-muted-foreground">
-            {stats.salesCount} pedidos
-            {stats.creditReceived > 0 && ` · fiado: ${formatBRL(stats.creditReceived)}`}
-          </p>
-          <p className="mt-1 text-[10px] font-semibold text-success">Ver pedidos →</p>
-        </Card>
-        <Card
-          role="button"
-          tabIndex={0}
-          onClick={() => nav(`/despesas?period=${period}`)}
-          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && nav(`/despesas?period=${period}`)}
-          className="p-4 shadow-card-retro border-l-4 border-l-destructive cursor-pointer hover:shadow-md active:scale-[0.98] transition"
-        >
-          <div className="flex items-center gap-2 text-destructive">
-            <TrendingDown className="h-4 w-4" />
-            <span className="text-[11px] font-semibold uppercase">Despesas</span>
-          </div>
-          <p className="mt-1 font-display text-2xl">{formatBRL(stats.expenses)}</p>
-          <p className="mt-1 text-[10px] font-semibold text-destructive">Ver despesas →</p>
-        </Card>
-        <Card className="p-4 shadow-card-retro border-l-4 border-l-primary">
-          <div className="flex items-center gap-2 text-primary">
-            <Wallet className="h-4 w-4" />
-            <span className="text-[11px] font-semibold uppercase">Saldo</span>
-          </div>
-          <p className="mt-1 font-display text-2xl">{formatBRL(profit)}</p>
-        </Card>
-        <Card className="p-4 shadow-card-retro border-l-4 border-l-accent">
-          <div className="flex items-center gap-2 text-accent-foreground">
-            <AlertCircle className="h-4 w-4" />
-            <span className="text-[11px] font-semibold uppercase">Em fiado</span>
-          </div>
-          <p className="mt-1 font-display text-2xl">{formatBRL(stats.openCredit)}</p>
-        </Card>
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-32 rounded-xl border border-border bg-card p-4 shadow-card-retro animate-pulse">
+              <div className="h-4 w-20 rounded bg-muted mb-2" />
+              <div className="h-8 w-24 rounded bg-muted" />
+            </div>
+          ))
+        ) : (
+          <>
+            <Card
+              role="button"
+              tabIndex={0}
+              onClick={() => nav(`/pedidos?period=${period}`)}
+              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && nav(`/pedidos?period=${period}`)}
+              className="p-4 shadow-card-retro border-l-4 border-l-success cursor-pointer hover:shadow-md active:scale-[0.98] transition"
+            >
+              <div className="flex items-center gap-2 text-success">
+                <TrendingUp className="h-4 w-4" />
+                <span className="text-[11px] font-semibold uppercase">Vendas</span>
+              </div>
+              <p className="mt-1 font-display text-2xl">{formatBRL(stats.sales)}</p>
+              <p className="text-[11px] text-muted-foreground">
+                {stats.salesCount} pedidos
+                {stats.creditReceived > 0 && ` · fiado: ${formatBRL(stats.creditReceived)}`}
+              </p>
+              <p className="mt-1 text-[10px] font-semibold text-success">Ver pedidos →</p>
+            </Card>
+            <Card
+              role="button"
+              tabIndex={0}
+              onClick={() => nav(`/despesas?period=${period}`)}
+              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && nav(`/despesas?period=${period}`)}
+              className="p-4 shadow-card-retro border-l-4 border-l-destructive cursor-pointer hover:shadow-md active:scale-[0.98] transition"
+            >
+              <div className="flex items-center gap-2 text-destructive">
+                <TrendingDown className="h-4 w-4" />
+                <span className="text-[11px] font-semibold uppercase">Despesas</span>
+              </div>
+              <p className="mt-1 font-display text-2xl">{formatBRL(stats.expenses)}</p>
+              <p className="mt-1 text-[10px] font-semibold text-destructive">Ver despesas →</p>
+            </Card>
+            <Card className="p-4 shadow-card-retro border-l-4 border-l-primary">
+              <div className="flex items-center gap-2 text-primary">
+                <Wallet className="h-4 w-4" />
+                <span className="text-[11px] font-semibold uppercase">Saldo</span>
+              </div>
+              <p className="mt-1 font-display text-2xl">{formatBRL(profit)}</p>
+            </Card>
+            <Card className="p-4 shadow-card-retro border-l-4 border-l-accent">
+              <div className="flex items-center gap-2 text-accent-foreground">
+                <AlertCircle className="h-4 w-4" />
+                <span className="text-[11px] font-semibold uppercase">Em fiado</span>
+              </div>
+              <p className="mt-1 font-display text-2xl">{formatBRL(stats.openCredit)}</p>
+            </Card>
+          </>
+        )}
       </div>
 
       {/* Ticket médio */}
@@ -517,7 +528,7 @@ export default function Home() {
         </div>
       </div>
 
-      {loading && <p className="mt-4 text-center text-xs text-muted-foreground">Atualizando…</p>}
+      
     </AppShell>
   );
 }

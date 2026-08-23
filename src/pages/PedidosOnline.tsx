@@ -330,7 +330,20 @@ export default function PedidosOnline() {
         )}
       </div>
 
-      {source === "pdv" ? (
+      {loading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-32 rounded-xl border border-border bg-card p-4 animate-pulse">
+              <div className="flex justify-between mb-4">
+                <div className="h-5 w-24 rounded bg-muted" />
+                <div className="h-5 w-16 rounded bg-muted" />
+              </div>
+              <div className="h-4 w-40 rounded bg-muted mb-2" />
+              <div className="h-3 w-20 rounded bg-muted" />
+            </div>
+          ))}
+        </div>
+      ) : source === "pdv" ? (
         <>
           <p className="mb-2 text-[11px] text-muted-foreground flex justify-between">
             <span>{pdvSales.length} vendas no PDV</span>
@@ -394,7 +407,7 @@ export default function PedidosOnline() {
       </div>
 
 
-      {loading && <p className="text-center text-sm text-muted-foreground py-8">Carregando...</p>}
+      
 
       <div className="space-y-3">
         {visible.map((o) => (
