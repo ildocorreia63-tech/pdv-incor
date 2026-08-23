@@ -57,3 +57,5 @@ Garantir que o sistema está pronto para produção.
 | **Segurança** | Security Definer RPCs | Prevenir acesso não autorizado a preços/estoque |
 | **Dados** | TanStack Query Cache | Reduzir consumo de banda e redundância de requests |
 | **Mobile** | PWA Manifest & Service Workers | Garantir funcionamento offline básico e instalação |
+
+comforme vai clicando os de traz vai desaparecendo
