@@ -246,7 +246,7 @@ export default function Home() {
   const maxMethod = Math.max(...byMethod.map((m) => m.total), 1);
 
   return (
-    <AppShell>
+    <AppShell title="Resumo">
       <div className="mb-3 flex items-end justify-between gap-2">
         <div>
           <p className="text-xs uppercase tracking-widest text-muted-foreground">Dashboard</p>

@@ -476,42 +476,89 @@ export default function Admin() {
 
   return (
     <AppShell
-      title="Admin — Produtos"
+      title="Painel Admin"
       subAction={
-        <div className="flex gap-1 flex-wrap">
-          <Button asChild size="icon" variant="outline" title="Insumos & Ficha Técnica">
-            <Link to="/insumos"><Boxes className="h-4 w-4" /></Link>
+        <>
+          <Link to="/relatorios">
+            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Relatórios">
+              <ClipboardList className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Link to="/clientes">
+            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Clientes">
+              <Users className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Link to="/aniversariantes">
+            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Aniversariantes">
+              <Cake className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Link to="/insumos">
+            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Insumos">
+              <Boxes className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Link to="/lista-compras">
+            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Lista de Compras">
+              <Tag className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 shrink-0"
+            onClick={() => setSettingsOpen(true)}
+            title="Configurações"
+          >
+            <SettingsIcon className="h-5 w-5" />
           </Button>
-          <Button asChild size="icon" variant="outline" title="Lista de Compras">
-            <Link to="/lista-compras"><ClipboardList className="h-4 w-4" /></Link>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 shrink-0"
+            onClick={() => setZonesOpen(true)}
+            title="Bairros / Taxas"
+          >
+            <MapPin className="h-5 w-5" />
           </Button>
-          <Button asChild size="icon" variant="outline" title="Clientes">
-            <Link to="/clientes"><Users className="h-4 w-4" /></Link>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 shrink-0"
+            onClick={() => setCatOpen(true)}
+            title="Categorias"
+          >
+            <Tag className="h-5 w-5" />
           </Button>
-          <Button asChild size="icon" variant="outline" title="Aniversariantes do mês">
-            <Link to="/aniversariantes"><Cake className="h-4 w-4" /></Link>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 shrink-0"
+            onClick={() => setSimOpen(true)}
+            title="Testar webhook Asaas"
+          >
+            <Webhook className="h-5 w-5" />
           </Button>
-
-          <Button size="icon" variant="outline" onClick={() => setSettingsOpen(true)} title="Configurações da loja">
-            <SettingsIcon className="h-4 w-4" />
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 shrink-0 text-destructive"
+            onClick={() => setResetOpen(true)}
+            title="Zerar Sistema"
+          >
+            <RotateCcw className="h-5 w-5" />
           </Button>
-          <Button size="icon" variant="outline" onClick={() => setZonesOpen(true)} title="Bairros (entrega)">
-            <MapPin className="h-4 w-4" />
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 shrink-0"
+            onClick={openNew}
+            title="Novo Produto"
+          >
+            <Plus className="h-5 w-5" />
           </Button>
-          <Button size="icon" variant="outline" onClick={() => setCatOpen(true)} title="Categorias">
-            <Tag className="h-4 w-4" />
-          </Button>
-          <Button size="icon" variant="outline" onClick={() => setSimOpen(true)} title="Testar webhook Asaas">
-            <Webhook className="h-4 w-4" />
-          </Button>
-          <Button size="icon" variant="outline" className="text-destructive" onClick={() => setResetOpen(true)} title="Zerar sistema">
-            <RotateCcw className="h-4 w-4" />
-          </Button>
-
-          <Button size="icon" variant="outline" onClick={openNew} title="Novo produto">
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
+        </>
       }
     >
       <div className="space-y-4">

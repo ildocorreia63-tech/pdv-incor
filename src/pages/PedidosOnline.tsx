@@ -284,7 +284,7 @@ export default function PedidosOnline() {
   ];
 
   return (
-    <AppShell title="Pedidos">
+    <AppShell title="Pedidos Online">
       <div className="mb-3 inline-flex w-full rounded-lg border border-border bg-card p-1 shadow-sm">
         <button
           onClick={() => setSource("online")}
