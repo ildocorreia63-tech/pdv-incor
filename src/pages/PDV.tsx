@@ -343,7 +343,7 @@ export default function PDV() {
   );
 }
 
-import React from "react";
+
 
 const CatChip = React.memo(({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) => (
   <button
