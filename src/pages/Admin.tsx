@@ -1034,7 +1034,7 @@ export default function Admin() {
               <p className="text-[11px] text-muted-foreground">Sem acentos. Limite de 25 e 15 caracteres conforme padrão BR Code.</p>
             </div>
             <div className="rounded-md bg-muted/50 p-2 text-xs">
-              Link do cardápio: <code className="text-primary">{window.location.origin}/cardapio</code>
+              Link do cardápio: <a href="/cardapio" target="_blank" className="text-primary underline hover:text-primary/80">{window.location.origin}/cardapio</a>
             </div>
           </div>
           <div className="border-t border-border p-3 bg-background">
