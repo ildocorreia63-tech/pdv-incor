@@ -60,3 +60,4 @@ Garantir que o sistema está pronto para produção.
 
 comforme vai clicando os de traz vai desaparecendo
 opçao de aplicar modo escuro
+mplementação do modo escuro (Dark Mode)
