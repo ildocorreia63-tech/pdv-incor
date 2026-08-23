@@ -17,52 +17,81 @@ export const AppHeader = ({ title, action, subAction }: { title?: string; action
           <img src={storeLogo ?? defaultLogo} alt="Logo da loja" className="h-full w-full object-contain" />
         </div>
         <div className="flex-1 min-w-0">
-          <h1 className="font-display text-xl leading-none text-foreground">
+          <h1 className="font-display text-2xl leading-none text-foreground uppercase tracking-tight">
             {title ?? "1980 Burguer"}
           </h1>
-          <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
         </div>
         {action}
         <Button size="icon" variant="ghost" onClick={signOut} aria-label="Sair">
           <LogOut className="h-4 w-4" />
         </Button>
       </div>
-      {(subAction || location.pathname !== "/pdv" && location.pathname !== "/") && (
+      {(subAction || (location.pathname !== "/pdv" && location.pathname !== "/" && location.pathname !== "/cozinha")) && (
         <div className="px-4 pb-3 flex gap-1 overflow-x-auto no-scrollbar">
-          {location.pathname.startsWith("/admin") ||
+          {(location.pathname.startsWith("/admin") ||
            location.pathname === "/relatorios" ||
            location.pathname === "/clientes" ||
            location.pathname === "/aniversariantes" ||
            location.pathname === "/insumos" ||
-           location.pathname === "/lista-compras" ? (
+           location.pathname === "/lista-compras") ? (
             <>
               <Link to="/admin">
-                <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Painel Admin">
+                <Button 
+                  variant={location.pathname === "/admin" ? "default" : "outline"} 
+                  size="icon" 
+                  className="h-10 w-10 shrink-0" 
+                  title="Painel Admin"
+                >
                   <LayoutDashboard className="h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/relatorios">
-                <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Relatórios">
+                <Button 
+                  variant={location.pathname === "/relatorios" ? "default" : "outline"} 
+                  size="icon" 
+                  className="h-10 w-10 shrink-0" 
+                  title="Relatórios"
+                >
                   <ClipboardList className="h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/clientes">
-                <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Clientes">
+                <Button 
+                  variant={location.pathname === "/clientes" ? "default" : "outline"} 
+                  size="icon" 
+                  className="h-10 w-10 shrink-0" 
+                  title="Clientes"
+                >
                   <Users className="h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/aniversariantes">
-                <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Aniversariantes">
+                <Button 
+                  variant={location.pathname === "/aniversariantes" ? "default" : "outline"} 
+                  size="icon" 
+                  className="h-10 w-10 shrink-0" 
+                  title="Aniversariantes"
+                >
                   <Cake className="h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/insumos">
-                <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Insumos">
+                <Button 
+                  variant={location.pathname === "/insumos" ? "default" : "outline"} 
+                  size="icon" 
+                  className="h-10 w-10 shrink-0" 
+                  title="Insumos"
+                >
                   <Boxes className="h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/lista-compras">
-                <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Lista de Compras">
+                <Button 
+                  variant={location.pathname === "/lista-compras" ? "default" : "outline"} 
+                  size="icon" 
+                  className="h-10 w-10 shrink-0" 
+                  title="Lista de Compras"
+                >
                   <Tag className="h-5 w-5" />
                 </Button>
               </Link>

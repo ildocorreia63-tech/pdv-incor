@@ -233,7 +233,6 @@ export default function Relatorios() {
   return (
     <AppShell title="Relatórios">
       <div className="mb-3">
-        <p className="text-xs uppercase tracking-widest text-muted-foreground">Relatório</p>
         <h2 className="font-display text-3xl">Resumo do período</h2>
       </div>
 
