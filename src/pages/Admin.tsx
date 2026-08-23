@@ -476,7 +476,7 @@ export default function Admin() {
 
   return (
     <AppShell
-      title="Admin — Produtos"
+      title="Painel Admin"
       subAction={
         <>
           <Link to="/relatorios">
