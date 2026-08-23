@@ -510,9 +510,9 @@ export default function Admin() {
 
           <Button size="icon" variant="outline" onClick={openNew} title="Novo produto">
             <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-      }
+            </Button>
+          </>
+        }
     >
       <div className="space-y-4">
         {grouped.map((g) => (

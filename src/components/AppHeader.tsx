@@ -2,12 +2,14 @@ import defaultLogo from "@/assets/logo-1980.jpg";
 import { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, ClipboardList, Users, Cake, Boxes, Tag, Settings as SettingsIcon, MapPin, RotateCcw, Plus, LayoutDashboard } from "lucide-react";
 import { useStoreLogo } from "@/hooks/useStoreLogo";
+import { Link, useLocation } from "react-router-dom";
 
 export const AppHeader = ({ title, action, subAction }: { title?: string; action?: ReactNode; subAction?: ReactNode }) => {
   const { signOut, user } = useAuth();
   const storeLogo = useStoreLogo();
+  const location = useLocation();
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur-md">
       <div className="flex items-center gap-3 px-4 py-3">
@@ -25,8 +27,47 @@ export const AppHeader = ({ title, action, subAction }: { title?: string; action
           <LogOut className="h-4 w-4" />
         </Button>
       </div>
-      {subAction && (
-        <div className="px-4 pb-3 flex gap-1 flex-wrap">
+      {(subAction || location.pathname !== "/pdv" && location.pathname !== "/") && (
+        <div className="px-4 pb-3 flex gap-1 overflow-x-auto no-scrollbar">
+          {location.pathname.startsWith("/admin") ||
+           location.pathname === "/relatorios" ||
+           location.pathname === "/clientes" ||
+           location.pathname === "/aniversariantes" ||
+           location.pathname === "/insumos" ||
+           location.pathname === "/lista-compras" ? (
+            <>
+              <Link to="/admin">
+                <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Painel Admin">
+                  <LayoutDashboard className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Link to="/relatorios">
+                <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Relatórios">
+                  <ClipboardList className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Link to="/clientes">
+                <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Clientes">
+                  <Users className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Link to="/aniversariantes">
+                <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Aniversariantes">
+                  <Cake className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Link to="/insumos">
+                <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Insumos">
+                  <Boxes className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Link to="/lista-compras">
+                <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Lista de Compras">
+                  <Tag className="h-5 w-5" />
+                </Button>
+              </Link>
+            </>
+          ) : null}
           {subAction}
         </div>
       )}
