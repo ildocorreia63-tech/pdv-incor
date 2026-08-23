@@ -343,7 +343,9 @@ export default function PDV() {
   );
 }
 
-const CatChip = ({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) => (
+import React from "react";
+
+const CatChip = React.memo(({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) => (
   <button
     onClick={onClick}
     className={cn(
@@ -355,9 +357,11 @@ const CatChip = ({ label, active, onClick }: { label: string; active: boolean; o
   >
     {label}
   </button>
-);
+));
 
-const TableChip = ({
+CatChip.displayName = "CatChip";
+
+const TableChip = React.memo(({
   label, icon, count, active, onClick,
 }: { label: string; icon: React.ReactNode; count: number; active: boolean; onClick: () => void }) => (
   <button
@@ -382,4 +386,6 @@ const TableChip = ({
       </span>
     )}
   </button>
-);
+));
+
+TableChip.displayName = "TableChip";
