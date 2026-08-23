@@ -63,3 +63,4 @@ opçao de aplicar modo escuro
 mplementação do modo escuro (Dark Mode)
 siga
 sim implementação de Dark Mode).
+implante o botao para o modo dark
