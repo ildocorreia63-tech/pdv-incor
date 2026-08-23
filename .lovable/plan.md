@@ -1,27 +1,59 @@
-## Banner do Cardápio Digital
+# Plano de Auditoria Técnica e Otimização - 1980 Burguer PDV
 
-Adicionar uma imagem de banner (única, editável) no topo da página `/cardapio`, gerenciada pelo Admin.
+Este documento detalha o plano de auditoria profunda e correção de bugs solicitado pelo usuário para garantir a estabilidade e performance do sistema.
 
-### 1. Backend
-- Migration: adicionar colunas em `store_settings`:
-  - `banner_url text`
-  - `banner_enabled boolean default true`
-- Reaproveitar bucket público existente `product-images` para hospedar a imagem (evita nova bucket/políticas).
+## 1. Fase de Análise e Diagnóstico
+Realizar uma varredura completa em todos os domínios do sistema.
 
-### 2. Admin (`src/pages/Admin.tsx` → seção Configurações)
-- Nova seção "Banner do Cardápio" com:
-  - Preview da imagem atual.
-  - Botão de upload (envia para `product-images/banners/{timestamp}.jpg` e salva `banner_url`).
-  - Botão "Remover banner".
-  - Switch "Exibir banner no cardápio" (`banner_enabled`).
-- Botão "Salvar" reaproveitando padrão já existente.
+### Infraestrutura e Backend (Supabase Engineer)
+- **RLS & Security:** Verificar se 100% das tabelas têm RLS ativo e políticas corretas.
+- **RPCs:** Auditar `create_online_order`, `upsert_customer_profile` e `reset_operational_data` para segurança e integridade de dados.
+- **Realtime:** Testar se as inscrições de realtime em `products` e `categories` estão funcionando sem memory leaks.
+- **Database Performance:** Verificar índices em colunas de filtro frequente (ex: `sale_id` em `sale_items`).
 
-### 3. Cardápio (`src/pages/Cardapio.tsx`)
-- Carregar `banner_url` e `banner_enabled` do `store_settings`.
-- Renderizar `<img>` responsivo no topo (largura total, altura ~160–220px mobile / ~280px desktop, `object-cover`, cantos arredondados) apenas quando habilitado e URL existir.
-- Alt text com nome da loja para SEO.
+### Frontend e UI (UI Architect)
+- **Estado Global:** Auditar `usePersistentState` para evitar corrupção de dados no `localStorage`.
+- **Renderização:** Identificar re-renderizações desnecessárias em listas grandes (PDV e Pedidos Online).
+- **Responsividade:** Testar fluxos críticos (checkout, carrinho) em diferentes viewports mobile.
+- **Erros de Console:** Eliminar todos os warnings de `key` e props inválidas no DOM.
 
-### Detalhes técnicos
-- Validação do arquivo no upload: tipo `image/*`, tamanho ≤ 3 MB, com toast de erro claro.
-- Loading skeleton enquanto a imagem carrega.
-- Nenhuma alteração em fluxo de pedidos, carrinho ou pagamento.
+### Integrações (API Integrator)
+- **Asaas:** Testar fluxo completo de PIX e Cartão em ambiente Sandbox.
+- **Webhooks:** Validar recebimento de sinais e transição de status de pedidos.
+- **Google Maps:** Verificar cálculo de frete por KM e fallback Haversine.
+
+---
+
+## 2. Implementação e Correções
+Corrigir os problemas identificados com foco em soluções definitivas.
+
+### Estabilidade e Resiliência
+- **Error Boundaries:** Garantir que falhas em componentes isolados não derrubem a aplicação inteira.
+- **Input Validation:** Reforçar validações Zod em formulários e payloads de Edge Functions.
+- **Race Conditions:** Implementar cancelamento de requisições obsoletas via TanStack Query.
+
+### Performance e UX
+- **Code Splitting:** Otimizar chunks para carregamento inicial rápido (< 2s).
+- **Asset Optimization:** Garantir que imagens sejam redimensionadas e servidas em formato WebP.
+- **Feedback Visual:** Adicionar skeleton loaders consistentes em todas as transições assíncronas.
+
+---
+
+## 3. Verificação Final e Quality Gate
+Garantir que o sistema está pronto para produção.
+
+- **Fluxo de Autenticação:** Testar login, logout e persistência de sessão.
+- **CRUD Crítico:** Realizar vendas completas no PDV e pedidos no Cardápio Digital.
+- **Mobile Check:** Validar funcionamento PWA e Capacitor.
+- **Scan de Segurança:** Auditoria final de chaves expostas e permissões de banco.
+
+---
+
+## Detalhes Técnicos
+
+| Domínio | Ação Principal | Objetivo |
+| :--- | :--- | :--- |
+| **Arquitetura** | Lazy Loading & React.Suspense | Melhorar TBT (Total Blocking Time) |
+| **Segurança** | Security Definer RPCs | Prevenir acesso não autorizado a preços/estoque |
+| **Dados** | TanStack Query Cache | Reduzir consumo de banda e redundância de requests |
+| **Mobile** | PWA Manifest & Service Workers | Garantir funcionamento offline básico e instalação |
