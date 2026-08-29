@@ -219,6 +219,7 @@ export default function PDV() {
         </div>
       )}
 
+      <h2 className="sr-only">Produtos disponíveis</h2>
       <div className="grid grid-cols-2 gap-3 mt-3">
         {filtered.map((p) => (
           <button
@@ -267,6 +268,7 @@ export default function PDV() {
               {tableLabel(activeTable)}
             </SheetTitle>
           </SheetHeader>
+          <h2 className="sr-only">Itens do carrinho</h2>
           <div className="mt-3 space-y-2">
             {cart.map((it) => (
               <Card key={it.product.id} className="p-3 flex items-center gap-3">
@@ -277,14 +279,14 @@ export default function PDV() {
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setQty(it.product.id, -1)}>
+                  <Button size="icon" variant="outline" className="h-8 w-8" aria-label={`Diminuir quantidade de ${it.product.name}`} onClick={() => setQty(it.product.id, -1)}>
                     <Minus className="h-3 w-3" />
                   </Button>
                   <span className="w-7 text-center font-display text-lg">{it.qty}</span>
-                  <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setQty(it.product.id, 1)}>
+                  <Button size="icon" variant="outline" className="h-8 w-8" aria-label={`Aumentar quantidade de ${it.product.name}`} onClick={() => setQty(it.product.id, 1)}>
                     <Plus className="h-3 w-3" />
                   </Button>
-                  <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => removeItem(it.product.id)}>
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" aria-label={`Remover ${it.product.name} do carrinho`} onClick={() => removeItem(it.product.id)}>
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>

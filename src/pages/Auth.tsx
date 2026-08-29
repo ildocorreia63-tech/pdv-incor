@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import logo from "@/assets/logo-1980.jpg";
+import { Seo } from "@/components/Seo";
 
 export default function Auth() {
   const nav = useNavigate();
@@ -64,12 +65,18 @@ export default function Auth() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 gradient-paper">
+      <Seo
+        title="Login — 1980 Burguer PDV"
+        description="Acesse o painel da 1980 Burguer para gerenciar vendas, pedidos online, fiado e despesas da hamburgueria."
+        path="/auth"
+        noindex
+      />
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center text-center">
           <div className="mb-3 h-20 w-20 overflow-hidden rounded-2xl ring-4 ring-primary/30 shadow-retro">
             <img src={logo} alt="1980 Burguer" className="h-full w-full object-cover" />
           </div>
-          <h1 className="font-display text-4xl text-primary">1980 BURGUER</h1>
+          <h1 className="font-display text-4xl text-primary">1980 Burguer — Login</h1>
           <p className="text-sm text-muted-foreground">PDV — A sua hamburgueria</p>
         </div>
 

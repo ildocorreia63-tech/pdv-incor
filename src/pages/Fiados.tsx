@@ -141,7 +141,7 @@ export default function Fiados() {
       action={
         <Dialog open={newOpen} onOpenChange={setNewOpen}>
           <DialogTrigger asChild>
-            <Button size="icon" variant="outline"><Plus className="h-4 w-4" /></Button>
+            <Button size="icon" variant="outline" aria-label="Novo cliente"><Plus className="h-4 w-4" /></Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Novo cliente</DialogTitle></DialogHeader>
@@ -268,7 +268,7 @@ export default function Fiados() {
                 </div>
               )}
 
-              <h4 className="font-display text-lg mt-4 mb-2">Histórico</h4>
+              <h2 className="font-display text-lg mt-4 mb-2">Histórico</h2>
               <div className="space-y-2">
                 {history.map((s) => (
                   <Card key={s.id} className="p-2.5 flex items-center justify-between gap-2">
