@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
 import { friendlyMessage } from "./lib/errors";
@@ -29,7 +30,11 @@ window.addEventListener("error", (event) => {
   console.error("[window.error]", event.error || event.message);
 });
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(
+  <HelmetProvider>
+    <App />
+  </HelmetProvider>,
+);
 
 // Fade out the boot splash once the app has mounted
 requestAnimationFrame(() => {

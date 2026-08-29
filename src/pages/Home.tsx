@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { Seo } from "@/components/Seo";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -247,10 +248,16 @@ export default function Home() {
 
   return (
     <AppShell title="Resumo">
+      <Seo
+        title="Dashboard — 1980 Burguer PDV"
+        description="Painel da 1980 Burguer com vendas do dia, despesas, fiado, pedidos online e os produtos mais vendidos."
+        path="/"
+        noindex
+      />
       <div className="mb-3 flex items-end justify-between gap-2">
         <div>
           <p className="text-xs uppercase tracking-widest text-muted-foreground">Dashboard</p>
-          <h2 className="font-display text-3xl">Visão geral</h2>
+          <h1 className="font-display text-3xl">1980 Burguer — Dashboard</h1>
         </div>
       </div>
 
