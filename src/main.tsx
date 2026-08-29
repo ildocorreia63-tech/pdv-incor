@@ -30,7 +30,11 @@ window.addEventListener("error", (event) => {
   console.error("[window.error]", event.error || event.message);
 });
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(
+  <HelmetProvider>
+    <App />
+  </HelmetProvider>,
+);
 
 // Fade out the boot splash once the app has mounted
 requestAnimationFrame(() => {
