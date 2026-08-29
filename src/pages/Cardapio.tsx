@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { usePersistentState, clearPersistentState } from "@/hooks/usePersistentState";
 import { logEvent, newTraceId } from "@/lib/debugLog";
 import { DebugLogDialog } from "@/components/DebugLogDialog";
+import { Seo } from "@/components/Seo";
 
 const CART_KEY = "cardapio:cart:v1";
 const CHECKOUT_KEY = "cardapio:checkout:v1";
@@ -622,12 +623,40 @@ export default function Cardapio() {
     );
   }
 
+  const storeName = settings?.store_name ?? "1980 Burguer";
+  /** Schema.org Restaurant + Menu para o cardápio público. */
+  const menuJsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    name: storeName,
+    servesCuisine: "Hamburgueria",
+    url: "https://pdv1980burguer.lovable.app/cardapio",
+    ...(settings?.store_address ? { address: settings.store_address } : {}),
+    ...(settings?.whatsapp_number ? { telephone: settings.whatsapp_number } : {}),
+    hasMenu: {
+      "@type": "Menu",
+      name: `Cardápio ${storeName}`,
+      hasMenuItem: products.slice(0, 50).map((p) => ({
+        "@type": "MenuItem",
+        name: p.name,
+        ...(p.description ? { description: p.description } : {}),
+        offers: { "@type": "Offer", price: Number(p.price).toFixed(2), priceCurrency: "BRL" },
+      })),
+    },
+  };
+
   const todayHours = settings?.business_hours?.[String(new Date().getDay())] ?? null;
   const wppDigits = onlyDigits(settings?.whatsapp_number);
   const minOrder = Number(settings?.min_order_value ?? 0);
 
   return (
     <div className="min-h-screen pb-24 bg-background">
+      <Seo
+        title={`Cardápio Online — ${storeName}`}
+        description="Peça hambúrgueres, porções e bebidas da 1980 Burguer pelo cardápio digital: entrega, retirada e pagamento por Pix ou cartão."
+        path="/cardapio"
+        jsonLd={menuJsonLd}
+      />
       {/* Hero */}
       <header className="bg-gradient-to-br from-primary to-primary-glow text-primary-foreground">
 
