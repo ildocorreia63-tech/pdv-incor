@@ -16,7 +16,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatBRL } from "@/lib/format";
 import { handleError } from "@/lib/errors";
 import { CustomerPurchaseHistoryDialog } from "@/components/customers/CustomerPurchaseHistoryDialog";
-import { Plus, Phone, Mail, Cake, Pencil, Search, ReceiptText } from "lucide-react";
+import { Plus, Phone, Mail, Cake, Pencil, Search, ReceiptText, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 export interface CustomerRow {
@@ -59,6 +69,19 @@ export default function Clientes() {
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [historyCustomer, setHistoryCustomer] = useState<CustomerRow | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<CustomerRow | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const { error } = await supabase.from("customers").delete().eq("id", deleteTarget.id);
+    setDeleting(false);
+    if (error) return handleError(error, "Não foi possível excluir o cliente");
+    toast.success("Cliente excluído!");
+    setList((l) => l.filter((c) => c.id !== deleteTarget.id));
+    setDeleteTarget(null);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -217,6 +240,15 @@ export default function Clientes() {
             <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(c)} aria-label="Editar cliente">
               <Pencil className="h-4 w-4 text-primary" />
             </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+              onClick={() => setDeleteTarget(c)}
+              aria-label={`Excluir ${c.name}`}
+            >
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
           </Card>
         ))}
         {!loading && filtered.length === 0 && (
@@ -331,6 +363,33 @@ export default function Clientes() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={deleteTarget !== null} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir cliente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação vai excluir permanentemente <strong>{deleteTarget?.name}</strong> e não pode ser
+              desfeita.
+              {deleteTarget && deleteTarget.credit_balance > 0 && (
+                <span className="mt-1 block font-medium text-destructive">
+                  Atenção: este cliente possui saldo de fiado de {formatBRL(deleteTarget.credit_balance)}.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={confirmDelete}
+              disabled={deleting}
+            >
+              {deleting ? "Excluindo..." : "Sim, excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <CustomerPurchaseHistoryDialog
         customer={historyCustomer}
