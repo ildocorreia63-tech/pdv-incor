@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { LogOut, ClipboardList, Users, Cake, Boxes, Tag, Settings as SettingsIcon, MapPin, RotateCcw, Plus, LayoutDashboard } from "lucide-react";
 import { useStoreLogo } from "@/hooks/useStoreLogo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Link, useLocation } from "react-router-dom";
 
 export const AppHeader = ({ title, action, subAction }: { title?: string; action?: ReactNode; subAction?: ReactNode }) => {
@@ -22,6 +23,7 @@ export const AppHeader = ({ title, action, subAction }: { title?: string; action
           </h1>
         </div>
         {action}
+        <ThemeToggle />
         <Button size="icon" variant="ghost" onClick={signOut} aria-label="Sair">
           <LogOut className="h-4 w-4" />
         </Button>
