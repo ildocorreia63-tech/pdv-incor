@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
+import { ThemeProvider } from "next-themes";
 import App from "./App.tsx";
 import "./index.css";
 import { friendlyMessage } from "./lib/errors";
@@ -32,7 +33,9 @@ window.addEventListener("error", (event) => {
 
 createRoot(document.getElementById("root")!).render(
   <HelmetProvider>
-    <App />
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} storageKey="pdv-theme">
+      <App />
+    </ThemeProvider>
   </HelmetProvider>,
 );
 
