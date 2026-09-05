@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Public create online order items validated" ON public.online_order_items;
