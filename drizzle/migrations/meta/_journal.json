@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1788569077790,
+      "tag": "0000_lock_down_online_order_items_insert",
+      "breakpoints": true
+    }
+  ]
+}
