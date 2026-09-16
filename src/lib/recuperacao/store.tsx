@@ -1,6 +1,5 @@
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -11,15 +10,12 @@ import { estadoInicial } from "./seed";
 import { diasSemComprar } from "./format";
 import { renderMensagem } from "./message";
 import type { AppState, Campanha, Cliente, Config, Execucao, StatusIntegracao } from "./types";
-import { supabase } from "@/integrations/supabase/client";
 
-const CHAVE = "directsmash:v1";
+const CHAVE = "recuperacao:v1";
 
 interface StoreCtx {
   state: AppState;
   pronto: boolean;
-  entrar: (email: string, senha: string, cadastro: boolean) => Promise<"ok" | "confirmar-email">;
-  sair: () => Promise<void>;
   salvarConfig: (patch: Partial<Config>) => void;
   adicionarClientes: (novos: Cliente[]) => void;
   atualizarCliente: (id: string, patch: Partial<Cliente>) => void;
@@ -47,144 +43,20 @@ function carregar(): AppState {
       ...salvo,
       config: { ...base.config, ...(salvo.config ?? {}) },
       etapasAtivas: { ...base.etapasAtivas, ...(salvo.etapasAtivas ?? {}) },
+      autenticado: true,
     };
   } catch {
     return estadoInicial();
   }
 }
 
-type CampaignRow = {
-  client_key: string;
-  name: string;
-  trigger_days: number;
-  start_time: string;
-  end_time: string;
-  segment: Campanha["segmento"];
-  benefit: string;
-  menu_url: string;
-  message: string;
-  active: boolean;
-  sent_count: number;
-  delivered_count: number;
-  click_count: number;
-  order_count: number;
-  created_at: string;
-};
-
-type ExecutionRow = {
-  id: string;
-  executed_at: string;
-  client_key: string;
-  client_name: string;
-  campaign_key: string;
-  campaign_name: string;
-  result: Execucao["resultado"];
-  reason: string;
-  steps: unknown;
-  converted: boolean;
-  conversion_value: number;
-  commission_rate: number;
-  savings_amount: number | null;
-};
-
-function etapasDoBanco(value: unknown): Execucao["etapas"] {
-  if (!Array.isArray(value)) return [];
-  return value.flatMap((item) => {
-    if (!item || typeof item !== "object") return [];
-    const etapa = item as Record<string, unknown>;
-    if (
-      typeof etapa["nome"] !== "string" ||
-      typeof etapa["ok"] !== "boolean" ||
-      typeof etapa["detalhe"] !== "string"
-    ) return [];
-    return [{ nome: etapa["nome"], ok: etapa["ok"], detalhe: etapa["detalhe"] }];
-  });
-}
-
-function campanhaDoBanco(row: CampaignRow): Campanha {
-  return {
-    id: row.client_key,
-    nome: row.name,
-    gatilhoDias: row.trigger_days,
-    horaInicio: row.start_time.slice(0, 5),
-    horaFim: row.end_time.slice(0, 5),
-    segmento: row.segment,
-    beneficio: row.benefit,
-    linkCardapio: row.menu_url,
-    mensagem: row.message,
-    ativa: row.active,
-    criadaEm: row.created_at,
-    stats: {
-      enviados: row.sent_count,
-      entregues: row.delivered_count,
-      cliques: row.click_count,
-      pedidos: row.order_count,
-    },
-  };
-}
-
-function execucaoDoBanco(row: ExecutionRow): Execucao {
-  return {
-    id: row.id,
-    data: row.executed_at,
-    clienteId: row.client_key,
-    clienteNome: row.client_name,
-    campanhaId: row.campaign_key,
-    campanhaNome: row.campaign_name,
-    resultado: row.result,
-    motivo: row.reason,
-    etapas: etapasDoBanco(row.steps),
-    convertido: row.converted,
-    valorConversao: Number(row.conversion_value),
-    taxaComissao: Number(row.commission_rate),
-    economia: Number(row.savings_amount),
-  };
-}
-
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppState>(() => estadoInicial());
   const [pronto, setPronto] = useState(false);
 
-  // Configurações e clientes continuam disponíveis offline; campanhas e execuções vêm da conta.
   useEffect(() => {
-    setState(carregar());
-    let ativo = true;
-
-    async function aplicarSessao() {
-      const { data } = await supabase.auth.getSession();
-      if (!ativo) return;
-      const usuario = data.session?.user;
-      if (!usuario) {
-        setState((s) => ({ ...s, autenticado: false, usuario: "" }));
-        setPronto(true);
-        return;
-      }
-
-      const [campanhas, execucoes] = await Promise.all([
-        supabase.from("campaigns").select("*").order("created_at", { ascending: false }),
-        supabase.from("campaign_executions").select("*").order("executed_at", { ascending: false }),
-      ]);
-      if (!ativo) return;
-      if (campanhas.error) throw campanhas.error;
-      if (execucoes.error) throw execucoes.error;
-      setState((s) => ({
-        ...s,
-        autenticado: true,
-        usuario: usuario.email ?? "Conta DirectSmash",
-        campanhas: (campanhas.data as CampaignRow[]).map(campanhaDoBanco),
-        execucoes: execucoes.data.map((row) => execucaoDoBanco(row as ExecutionRow)),
-      }));
-      setPronto(true);
-    }
-
-    void aplicarSessao().catch(() => setPronto(true));
-    const { data: listener } = supabase.auth.onAuthStateChange(() => {
-      void aplicarSessao();
-    });
-    return () => {
-      ativo = false;
-      listener.subscription.unsubscribe();
-    };
+    setState({ ...carregar(), autenticado: true });
+    setPronto(true);
   }, []);
 
   useEffect(() => {
@@ -196,32 +68,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [state, pronto]);
 
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    document.documentElement.classList.toggle("dark", state.config.tema === "dark");
-  }, [state.config.tema]);
-
   const api = useMemo<StoreCtx>(() => {
     const patch = (fn: (s: AppState) => AppState) => setState((s) => fn(s));
     return {
       state,
       pronto,
-      entrar: async (email, senha, cadastro) => {
-        const resultado = cadastro
-          ? await supabase.auth.signUp({ email, password: senha })
-          : await supabase.auth.signInWithPassword({ email, password: senha });
-        if (resultado.error) throw resultado.error;
-        if (cadastro && !resultado.data.session) return "confirmar-email";
-        patch((s) => ({ ...s, autenticado: true, usuario: email, campanhas: [], execucoes: [] }));
-        return "ok";
-      },
-      sair: async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
-        patch((s) => ({ ...s, autenticado: false, usuario: "", campanhas: [], execucoes: [] }));
-      },
       salvarConfig: (p) => patch((s) => ({ ...s, config: { ...s.config, ...p } })),
-      adicionarClientes: (novos) => patch((s) => ({ ...s, clientes: [...novos, ...s.clientes] })),
+      adicionarClientes: (novos) =>
+        patch((s) => {
+          const existentes = new Set(s.clientes.map((c) => c.telefone.replace(/\D/g, "")));
+          const filtrados = novos.filter((c) => {
+            const tel = c.telefone.replace(/\D/g, "");
+            if (!tel || existentes.has(tel)) return false;
+            existentes.add(tel);
+            return true;
+          });
+          return { ...s, clientes: [...filtrados, ...s.clientes] };
+        }),
       atualizarCliente: (id, p) =>
         patch((s) => ({
           ...s,
@@ -230,29 +93,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       removerCliente: (id) =>
         patch((s) => ({ ...s, clientes: s.clientes.filter((c) => c.id !== id) })),
       salvarCampanha: async (campanha) => {
-        const { data: auth } = await supabase.auth.getUser();
-        if (!auth.user) throw new Error("Entre novamente para salvar a campanha.");
-        const { error } = await supabase.from("campaigns").upsert(
-          {
-            user_id: auth.user.id,
-            client_key: campanha.id,
-            name: campanha.nome,
-            trigger_days: campanha.gatilhoDias,
-            start_time: campanha.horaInicio,
-            end_time: campanha.horaFim,
-            segment: campanha.segmento,
-            benefit: campanha.beneficio,
-            menu_url: campanha.linkCardapio,
-            message: campanha.mensagem,
-            active: campanha.ativa,
-            sent_count: campanha.stats.enviados,
-            delivered_count: campanha.stats.entregues,
-            click_count: campanha.stats.cliques,
-            order_count: campanha.stats.pedidos,
-          },
-          { onConflict: "user_id,client_key" },
-        );
-        if (error) throw error;
         patch((s) => ({
           ...s,
           campanhas: s.campanhas.some((c) => c.id === campanha.id)
@@ -261,34 +101,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }));
       },
       removerCampanha: async (id) => {
-        const { error } = await supabase.from("campaigns").delete().eq("client_key", id);
-        if (error) throw error;
         patch((s) => ({ ...s, campanhas: s.campanhas.filter((c) => c.id !== id) }));
       },
       registrarExecucao: async (execucao) => {
-        const { data: auth } = await supabase.auth.getUser();
-        if (!auth.user) throw new Error("Entre novamente para registrar a execução.");
-        const { data, error } = await supabase
-          .from("campaign_executions")
-          .insert({
-            user_id: auth.user.id,
-            client_key: execucao.clienteId,
-            client_name: execucao.clienteNome,
-            campaign_key: execucao.campanhaId,
-            campaign_name: execucao.campanhaNome,
-            result: execucao.resultado,
-            reason: execucao.motivo,
-            steps: execucao.etapas,
-            converted: execucao.convertido,
-            conversion_value: execucao.valorConversao,
-            commission_rate: execucao.taxaComissao,
-            converted_at: execucao.convertido ? execucao.data : null,
-            executed_at: execucao.data,
-          })
-          .select("*")
-          .single();
-        if (error) throw error;
-        patch((s) => ({ ...s, execucoes: [execucaoDoBanco(data as ExecutionRow), ...s.execucoes] }));
+        patch((s) => ({ ...s, execucoes: [execucao, ...s.execucoes] }));
       },
       setIntegracao: (id, status) =>
         patch((s) => ({
@@ -301,11 +117,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           etapasAtivas: { ...s.etapasAtivas, [id]: !s.etapasAtivas[id] },
         })),
       setAutomacao: (ativa) => patch((s) => ({ ...s, automacaoAtiva: ativa })),
-      restaurarDemo: () =>
-        setState(() => {
-          const novo = estadoInicial();
-          return { ...novo, autenticado: true, usuario: state.usuario };
-        }),
+      restaurarDemo: () => setState(() => ({ ...estadoInicial(), autenticado: true })),
     };
   }, [state, pronto]);
 
