@@ -1,10 +1,1 @@
-project_id = "tztetyegxbgbrcuazodx"
-
-[functions.asaas-create-pix]
-verify_jwt = false
-
-[functions.asaas-check-payment]
-verify_jwt = false
-
-[functions.asaas-webhook]
-verify_jwt = false
+project_id = "riqjuxmdoyqmveieskty"
