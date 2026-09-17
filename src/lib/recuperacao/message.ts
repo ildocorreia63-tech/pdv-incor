@@ -45,11 +45,11 @@ export function renderMensagem(
   linkCardapio: string,
 ): string {
   return template
-    .replaceAll("{{nome}}", cliente.nome.split(" ")[0] ?? cliente.nome)
-    .replaceAll("{{ultimo_pedido}}", cliente.ultimoPedido)
-    .replaceAll("{{dias_sem_comprar}}", String(diasSemComprar(cliente.ultimaCompra)))
-    .replaceAll("{{beneficio}}", beneficio)
-    .replaceAll("{{link_cardapio}}", linkCardapio);
+    .split("{{nome}}", cliente.nome.split(" ")[0] ?? cliente.nome)
+    .split("{{ultimo_pedido}}", cliente.ultimoPedido)
+    .split("{{dias_sem_comprar}}", String(diasSemComprar(cliente.ultimaCompra)))
+    .split("{{beneficio}}", beneficio)
+    .split("{{link_cardapio}}", linkCardapio);
 }
 
 export function previaCampanha(campanha: Campanha, cliente?: Cliente): string {
