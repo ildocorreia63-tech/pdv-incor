@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { Ban, Check, Search, Trash2 } from "lucide-react";
 import { RecuperacaoShell } from "@/components/recuperacao/RecuperacaoShell";
 import { ImportarCsvDialog } from "@/components/recuperacao/ImportarCsvDialog";
+import { ImportarPdvButton } from "@/components/recuperacao/ImportarPdvButton";
 import { AdicionarCampanhaDialog } from "@/components/recuperacao/AdicionarCampanhaDialog";
 import { LgpdAviso } from "@/components/recuperacao/LgpdAviso";
 import { Badge } from "@/components/ui/badge";
@@ -117,6 +118,7 @@ function Clientes() {
       descricao={`${state.clientes.length} contatos na base · ${filtrados.length} no filtro atual`}
       acoes={
         <>
+          <ImportarPdvButton />
           <ImportarCsvDialog />
           <Button
             size="sm"
