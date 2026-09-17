@@ -88,6 +88,19 @@ const App = () => (
                 <Route path="/aniversariantes" element={<ProtectedRoute><Aniversariantes /></ProtectedRoute>} />
                 <Route path="/clientes" element={<ProtectedRoute><Clientes /></ProtectedRoute>} />
 
+                <Route path="/recuperacao" element={<ProtectedRoute><RecuperacaoLayout /></ProtectedRoute>}>
+                  <Route index element={<RecPainel />} />
+                  <Route path="painel" element={<RecPainel />} />
+                  <Route path="clientes" element={<RecClientes />} />
+                  <Route path="campanhas" element={<RecCampanhas />} />
+                  <Route path="automacoes" element={<RecAutomacoes />} />
+                  <Route path="integracoes" element={<RecIntegracoes />} />
+                  <Route path="relatorios" element={<RecRelatorios />} />
+                  <Route path="configuracoes" element={<RecConfiguracoes />} />
+                  <Route path="planos" element={<RecPlanos />} />
+                </Route>
+
+
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
