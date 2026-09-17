@@ -38,18 +38,22 @@ export const MODELOS_MENSAGEM: { titulo: string; tom: string; texto: string }[] 
   },
 ];
 
+/** Substitui todas as ocorrências de uma variável sem depender de String.replaceAll. */
+function trocar(texto: string, chave: string, valor: string): string {
+  return texto.split(chave).join(valor);
+}
+
 export function renderMensagem(
   template: string,
   cliente: Pick<Cliente, "nome" | "ultimoPedido" | "ultimaCompra">,
   beneficio: string,
   linkCardapio: string,
 ): string {
-  return template
-    .split("{{nome}}", cliente.nome.split(" ")[0] ?? cliente.nome)
-    .split("{{ultimo_pedido}}", cliente.ultimoPedido)
-    .split("{{dias_sem_comprar}}", String(diasSemComprar(cliente.ultimaCompra)))
-    .split("{{beneficio}}", beneficio)
-    .split("{{link_cardapio}}", linkCardapio);
+  let saida = trocar(template, "{{nome}}", cliente.nome.split(" ")[0] ?? cliente.nome);
+  saida = trocar(saida, "{{ultimo_pedido}}", cliente.ultimoPedido);
+  saida = trocar(saida, "{{dias_sem_comprar}}", String(diasSemComprar(cliente.ultimaCompra)));
+  saida = trocar(saida, "{{beneficio}}", beneficio);
+  return trocar(saida, "{{link_cardapio}}", linkCardapio);
 }
 
 export function previaCampanha(campanha: Campanha, cliente?: Cliente): string {
