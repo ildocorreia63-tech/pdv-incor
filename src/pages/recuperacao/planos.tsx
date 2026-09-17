@@ -1,28 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
-import { AppShell } from "@/components/AppShell";
+import { RecuperacaoShell } from "@/components/recuperacao/RecuperacaoShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { calcularMetricas, useStore } from "@/lib/store";
-import { brl } from "@/lib/format";
-import type { Config } from "@/lib/types";
+import { calcularMetricas, useStore } from "@/lib/recuperacao/store";
+import { brl } from "@/lib/recuperacao/format";
+import type { Config } from "@/lib/recuperacao/types";
 
-export const Route = createFileRoute("/planos")({
-  head: () => ({
-    meta: [
-      { title: "Planos — DirectSmash" },
-      {
-        name: "description",
-        content: "Compare os planos Essencial e Crescimento e veja o retorno estimado do seu plano.",
-      },
-      { property: "og:title", content: "Planos — DirectSmash" },
-      { property: "og:description", content: "Planos mensais para recuperação de clientes." },
-    ],
-  }),
-  component: Planos,
-});
 
 const PLANOS: {
   nome: Config["plano"];
@@ -61,7 +46,7 @@ function Planos() {
   const m = calcularMetricas(state);
 
   return (
-    <AppShell titulo="Planos" descricao={`Plano atual: ${state.config.plano}`}>
+    <RecuperacaoShell titulo="Planos" descricao={`Plano atual: ${state.config.plano}`}>
       <div className="space-y-4">
         <Card>
           <CardContent className="p-5">
@@ -118,6 +103,8 @@ function Planos() {
           Ambiente de demonstração: nenhuma cobrança é realizada.
         </p>
       </div>
-    </AppShell>
+    </RecuperacaoShell>
   );
 }
+
+export default Planos;

@@ -16,8 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { elegivel, useStore } from "@/lib/store";
-import type { Cliente } from "@/lib/types";
+import { elegivel, useStore } from "@/lib/recuperacao/store";
+import type { Cliente } from "@/lib/recuperacao/types";
 
 export interface AdicionarCampanhaDialogProps {
   clientes: Cliente[];

@@ -1,8 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { AppShell } from "@/components/AppShell";
-import { LgpdAviso } from "@/components/LgpdAviso";
+import { RecuperacaoShell } from "@/components/recuperacao/RecuperacaoShell";
+import { LgpdAviso } from "@/components/recuperacao/LgpdAviso";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,27 +14,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useStore } from "@/lib/store";
-import type { Config, Origem } from "@/lib/types";
+import { useStore } from "@/lib/recuperacao/store";
+import type { Config, Origem } from "@/lib/recuperacao/types";
 
-export const Route = createFileRoute("/configuracoes")({
-  head: () => ({
-    meta: [
-      { title: "Configurações — DirectSmash" },
-      {
-        name: "description",
-        content:
-          "Dados da hamburgueria, comissão do marketplace, horários de envio, assinatura e privacidade.",
-      },
-      { property: "og:title", content: "Configurações — DirectSmash" },
-      {
-        property: "og:description",
-        content: "Ajuste as regras que alimentam campanhas e relatórios.",
-      },
-    ],
-  }),
-  component: Configuracoes,
-});
 
 function Configuracoes() {
   const { state, salvarConfig, restaurarDemo } = useStore();
@@ -58,7 +39,7 @@ function Configuracoes() {
   }
 
   return (
-    <AppShell titulo="Configurações" descricao="Dados da operação, envio e privacidade">
+    <RecuperacaoShell titulo="Configurações" descricao="Dados da operação, envio e privacidade">
       <div className="space-y-4">
         <Card>
           <CardHeader>
@@ -237,6 +218,8 @@ function Configuracoes() {
 
         <LgpdAviso />
       </div>
-    </AppShell>
+    </RecuperacaoShell>
   );
 }
+
+export default Configuracoes;

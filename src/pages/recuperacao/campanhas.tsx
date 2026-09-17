@@ -1,11 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, CircleSlash, History, Pencil, Play, Trash2 } from "lucide-react";
-import { AppShell } from "@/components/AppShell";
-import { CampanhaEditor, campanhaVazia } from "@/components/CampanhaEditor";
-import { WhatsAppPreview } from "@/components/WhatsAppPreview";
-import { LgpdAviso } from "@/components/LgpdAviso";
+import { RecuperacaoShell } from "@/components/recuperacao/RecuperacaoShell";
+import { CampanhaEditor, campanhaVazia } from "@/components/recuperacao/CampanhaEditor";
+import { WhatsAppPreview } from "@/components/recuperacao/WhatsAppPreview";
+import { LgpdAviso } from "@/components/recuperacao/LgpdAviso";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,29 +15,11 @@ import {
   jaRecebeu,
   publicoElegivel,
   useStore,
-} from "@/lib/store";
-import { previaCampanha } from "@/lib/message";
-import { brl, dataBR, dataHoraBR, pct } from "@/lib/format";
-import type { Campanha } from "@/lib/types";
+} from "@/lib/recuperacao/store";
+import { previaCampanha } from "@/lib/recuperacao/message";
+import { brl, dataBR, dataHoraBR, pct } from "@/lib/recuperacao/format";
+import type { Campanha } from "@/lib/recuperacao/types";
 
-export const Route = createFileRoute("/campanhas")({
-  head: () => ({
-    meta: [
-      { title: "Campanhas — DirectSmash" },
-      {
-        name: "description",
-        content:
-          "Crie campanhas de recuperação por 7, 15 e 30 dias com mensagem personalizada e simulação de envio.",
-      },
-      { property: "og:title", content: "Campanhas — DirectSmash" },
-      {
-        property: "og:description",
-        content: "Gatilhos, segmentos, ofertas e prévia da mensagem no WhatsApp.",
-      },
-    ],
-  }),
-  component: Campanhas,
-});
 
 function Campanhas() {
   const { state, salvarCampanha, removerCampanha, registrarExecucao } = useStore();
@@ -116,7 +97,7 @@ function Campanhas() {
   }
 
   return (
-    <AppShell
+    <RecuperacaoShell
       titulo="Campanhas"
       descricao={`${state.campanhas.length} campanhas · ${state.campanhas.filter((c) => c.ativa).length} ativas`}
       acoes={
@@ -281,6 +262,8 @@ function Campanhas() {
       </div>
 
       <CampanhaEditor campanha={editando} onOpenChange={(a) => !a && setEditando(null)} />
-    </AppShell>
+    </RecuperacaoShell>
   );
 }
+
+export default Campanhas;

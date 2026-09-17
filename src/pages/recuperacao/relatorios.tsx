@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -13,8 +12,8 @@ import {
   YAxis,
 } from "recharts";
 import { Banknote, Download, PiggyBank, Send, TrendingUp } from "lucide-react";
-import { AppShell } from "@/components/AppShell";
-import { StatCard } from "@/components/StatCard";
+import { RecuperacaoShell } from "@/components/recuperacao/RecuperacaoShell";
+import { StatCard } from "@/components/recuperacao/StatCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -32,27 +31,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { calcularMetricas, useStore } from "@/lib/store";
-import { brl, pct } from "@/lib/format";
+import { calcularMetricas, useStore } from "@/lib/recuperacao/store";
+import { brl, pct } from "@/lib/recuperacao/format";
 
-export const Route = createFileRoute("/relatorios")({
-  head: () => ({
-    meta: [
-      { title: "Relatórios — DirectSmash" },
-      {
-        name: "description",
-        content:
-          "Receita recuperada, economia em comissões, ROI e desempenho por campanha do seu delivery próprio.",
-      },
-      { property: "og:title", content: "Relatórios — DirectSmash" },
-      {
-        property: "og:description",
-        content: "Acompanhe resultados de recuperação e exporte os dados em CSV.",
-      },
-    ],
-  }),
-  component: Relatorios,
-});
 
 function Relatorios() {
   const { state } = useStore();
@@ -89,7 +70,7 @@ function Relatorios() {
   }
 
   return (
-    <AppShell
+    <RecuperacaoShell
       titulo="Relatórios"
       descricao="Resultados da recuperação e economia frente aos marketplaces"
       acoes={
@@ -231,6 +212,8 @@ function Relatorios() {
           </CardContent>
         </Card>
       </div>
-    </AppShell>
+    </RecuperacaoShell>
   );
 }
+
+export default Relatorios;
