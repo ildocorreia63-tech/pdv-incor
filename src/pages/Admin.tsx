@@ -489,6 +489,11 @@ export default function Admin() {
               <Users className="h-5 w-5" />
             </Button>
           </Link>
+          <Link to="/recuperacao/painel">
+            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Recuperação de clientes">
+              <Megaphone className="h-5 w-5" />
+            </Button>
+          </Link>
           <Link to="/aniversariantes">
             <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Aniversariantes">
               <Cake className="h-5 w-5" />
