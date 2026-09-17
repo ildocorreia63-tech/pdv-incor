@@ -1,11 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Ban, Check, Search, Trash2 } from "lucide-react";
-import { AppShell } from "@/components/AppShell";
-import { ImportarCsvDialog } from "@/components/ImportarCsvDialog";
-import { AdicionarCampanhaDialog } from "@/components/AdicionarCampanhaDialog";
-import { LgpdAviso } from "@/components/LgpdAviso";
+import { RecuperacaoShell } from "@/components/recuperacao/RecuperacaoShell";
+import { ImportarCsvDialog } from "@/components/recuperacao/ImportarCsvDialog";
+import { ImportarPdvButton } from "@/components/recuperacao/ImportarPdvButton";
+import { AdicionarCampanhaDialog } from "@/components/recuperacao/AdicionarCampanhaDialog";
+import { LgpdAviso } from "@/components/recuperacao/LgpdAviso";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,28 +27,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useStore } from "@/lib/store";
-import { brl, dataBR, diasSemComprar, telefoneMascarado } from "@/lib/format";
-import type { Cliente, Origem, StatusCliente } from "@/lib/types";
+import { useStore } from "@/lib/recuperacao/store";
+import { brl, dataBR, diasSemComprar, telefoneMascarado } from "@/lib/recuperacao/format";
+import type { Cliente, Origem, StatusCliente } from "@/lib/recuperacao/types";
 
-export const Route = createFileRoute("/clientes")({
-  head: () => ({
-    meta: [
-      { title: "Clientes — DirectSmash" },
-      {
-        name: "description",
-        content:
-          "Base de clientes com filtros por período, origem e status, importação de CSV e ações de opt-out.",
-      },
-      { property: "og:title", content: "Clientes — DirectSmash" },
-      {
-        property: "og:description",
-        content: "Gerencie a base de clientes do delivery próprio com respeito ao consentimento.",
-      },
-    ],
-  }),
-  component: Clientes,
-});
 
 const PERIODOS = [
   { valor: "todos", label: "Qualquer período" },
@@ -131,11 +113,12 @@ function Clientes() {
   }
 
   return (
-    <AppShell
+    <RecuperacaoShell
       titulo="Clientes"
       descricao={`${state.clientes.length} contatos na base · ${filtrados.length} no filtro atual`}
       acoes={
         <>
+          <ImportarPdvButton />
           <ImportarCsvDialog />
           <Button
             size="sm"
@@ -337,6 +320,8 @@ function Clientes() {
         aberto={dialogoCampanha}
         onOpenChange={setDialogoCampanha}
       />
-    </AppShell>
+    </RecuperacaoShell>
   );
 }
+
+export default Clientes;

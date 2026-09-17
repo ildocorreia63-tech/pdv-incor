@@ -1,35 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, CircleSlash, XCircle } from "lucide-react";
-import { AppShell } from "@/components/AppShell";
-import { LgpdAviso } from "@/components/LgpdAviso";
+import { RecuperacaoShell } from "@/components/recuperacao/RecuperacaoShell";
+import { LgpdAviso } from "@/components/recuperacao/LgpdAviso";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { dentroDoHorario, elegivel, jaRecebeu, publicoElegivel, useStore } from "@/lib/store";
-import { dataHoraBR } from "@/lib/format";
+import { dentroDoHorario, elegivel, jaRecebeu, publicoElegivel, useStore } from "@/lib/recuperacao/store";
+import { dataHoraBR } from "@/lib/recuperacao/format";
 
-export const Route = createFileRoute("/automacoes")({
-  head: () => ({
-    meta: [
-      { title: "Automações — DirectSmash" },
-      {
-        name: "description",
-        content:
-          "Fluxo automático de recuperação: compra, espera, consentimento, horário, envio e pedido.",
-      },
-      { property: "og:title", content: "Automações — DirectSmash" },
-      {
-        property: "og:description",
-        content: "Ative etapas do fluxo e simule execuções com log detalhado.",
-      },
-    ],
-  }),
-  component: Automacoes,
-});
 
 const ETAPAS = [
   { id: "compra", nome: "Compra registrada", detalhe: "Entrada vinda do PDV, CSV ou webhook" },
@@ -115,7 +96,7 @@ function Automacoes() {
   }
 
   return (
-    <AppShell
+    <RecuperacaoShell
       titulo="Automações"
       descricao="Fluxo de recuperação com regras de consentimento, horário e anti-repetição"
       acoes={
@@ -218,6 +199,8 @@ function Automacoes() {
 
         <LgpdAviso />
       </div>
-    </AppShell>
+    </RecuperacaoShell>
   );
 }
+
+export default Automacoes;

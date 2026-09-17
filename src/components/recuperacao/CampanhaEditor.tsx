@@ -19,10 +19,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { WhatsAppPreview } from "@/components/WhatsAppPreview";
-import { useStore } from "@/lib/store";
-import { MODELOS_MENSAGEM, VARIAVEIS, previaCampanha } from "@/lib/message";
-import type { Campanha } from "@/lib/types";
+import { WhatsAppPreview } from "@/components/recuperacao/WhatsAppPreview";
+import { useStore } from "@/lib/recuperacao/store";
+import { MODELOS_MENSAGEM, VARIAVEIS, previaCampanha } from "@/lib/recuperacao/message";
+import type { Campanha } from "@/lib/recuperacao/types";
 
 export function campanhaVazia(linkCardapio: string, beneficio: string): Campanha {
   return {

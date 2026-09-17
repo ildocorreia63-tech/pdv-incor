@@ -1,32 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { AppShell } from "@/components/AppShell";
-import { LgpdAviso } from "@/components/LgpdAviso";
+import { RecuperacaoShell } from "@/components/recuperacao/RecuperacaoShell";
+import { LgpdAviso } from "@/components/recuperacao/LgpdAviso";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useStore } from "@/lib/store";
-import type { StatusIntegracao } from "@/lib/types";
+import { useStore } from "@/lib/recuperacao/store";
+import type { StatusIntegracao } from "@/lib/recuperacao/types";
 
-export const Route = createFileRoute("/integracoes")({
-  head: () => ({
-    meta: [
-      { title: "Integrações — DirectSmash" },
-      {
-        name: "description",
-        content:
-          "Conecte WhatsApp Business API, PDV, Make, Typebot, ManyChat e webhooks ao DirectSmash.",
-      },
-      { property: "og:title", content: "Integrações — DirectSmash" },
-      {
-        property: "og:description",
-        content: "Requisitos técnicos e status simulado de cada conexão.",
-      },
-    ],
-  }),
-  component: Integracoes,
-});
 
 const ROTULO: Record<StatusIntegracao, string> = {
   "nao-conectado": "Não conectado",
@@ -48,7 +29,7 @@ function Integracoes() {
   }
 
   return (
-    <AppShell
+    <RecuperacaoShell
       titulo="Integrações"
       descricao="Conexões simuladas: nenhuma credencial real é solicitada ou armazenada"
     >
@@ -123,6 +104,8 @@ function Integracoes() {
 
         <LgpdAviso />
       </div>
-    </AppShell>
+    </RecuperacaoShell>
   );
 }
+
+export default Integracoes;

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import {
   Area,
   AreaChart,
@@ -17,30 +17,16 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import { AppShell } from "@/components/AppShell";
-import { StatCard } from "@/components/StatCard";
-import { LgpdAviso } from "@/components/LgpdAviso";
+import { RecuperacaoShell } from "@/components/recuperacao/RecuperacaoShell";
+import { StatCard } from "@/components/recuperacao/StatCard";
+import { LgpdAviso } from "@/components/recuperacao/LgpdAviso";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { calcularMetricas, elegivel, useStore } from "@/lib/store";
-import { brl, diasSemComprar, pct, telefoneMascarado } from "@/lib/format";
+import { calcularMetricas, elegivel, useStore } from "@/lib/recuperacao/store";
+import { brl, diasSemComprar, pct, telefoneMascarado } from "@/lib/recuperacao/format";
 
-export const Route = createFileRoute("/painel")({
-  head: () => ({
-    meta: [
-      { title: "Dashboard — DirectSmash" },
-      {
-        name: "description",
-        content: "Acompanhe clientes recuperados, pedidos diretos, economia em taxas e ROI.",
-      },
-      { property: "og:title", content: "Dashboard — DirectSmash" },
-      { property: "og:description", content: "Resultados da recuperação de clientes no delivery próprio." },
-    ],
-  }),
-  component: Painel,
-});
 
 function Painel() {
   const { state } = useStore();
@@ -62,12 +48,12 @@ function Painel() {
   const topo = Math.max(...funil.map((f) => f.valor), 1);
 
   return (
-    <AppShell
+    <RecuperacaoShell
       titulo={`Olá, ${state.config.nomeEmpresa}`}
       descricao="Resultados estimados dos últimos 30 dias"
       acoes={
         <Button asChild size="sm">
-          <Link to="/campanhas">Nova campanha</Link>
+          <Link to="/recuperacao/campanhas">Nova campanha</Link>
         </Button>
       }
     >
@@ -144,7 +130,7 @@ function Painel() {
             <CardHeader className="flex-row items-center justify-between">
               <CardTitle className="text-base">Oportunidades de hoje</CardTitle>
               <Button asChild variant="ghost" size="sm">
-                <Link to="/clientes">Ver clientes</Link>
+                <Link to="/recuperacao/clientes">Ver clientes</Link>
               </Button>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -171,7 +157,7 @@ function Painel() {
             <CardHeader className="flex-row items-center justify-between">
               <CardTitle className="text-base">Campanhas recentes</CardTitle>
               <Button asChild variant="ghost" size="sm">
-                <Link to="/campanhas">Gerenciar</Link>
+                <Link to="/recuperacao/campanhas">Gerenciar</Link>
               </Button>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -195,6 +181,8 @@ function Painel() {
 
         <LgpdAviso />
       </div>
-    </AppShell>
+    </RecuperacaoShell>
   );
 }
+
+export default Painel;

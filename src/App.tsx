@@ -27,6 +27,15 @@ const Acompanhar = lazy(() => import("./pages/Acompanhar"));
 const Cozinha = lazy(() => import("./pages/Cozinha"));
 const Aniversariantes = lazy(() => import("./pages/Aniversariantes"));
 const Clientes = lazy(() => import("./pages/Clientes"));
+const RecuperacaoLayout = lazy(() => import("./pages/recuperacao/Layout"));
+const RecPainel = lazy(() => import("./pages/recuperacao/painel"));
+const RecClientes = lazy(() => import("./pages/recuperacao/clientes"));
+const RecCampanhas = lazy(() => import("./pages/recuperacao/campanhas"));
+const RecAutomacoes = lazy(() => import("./pages/recuperacao/automacoes"));
+const RecIntegracoes = lazy(() => import("./pages/recuperacao/integracoes"));
+const RecRelatorios = lazy(() => import("./pages/recuperacao/relatorios"));
+const RecConfiguracoes = lazy(() => import("./pages/recuperacao/configuracoes"));
+const RecPlanos = lazy(() => import("./pages/recuperacao/planos"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,6 +87,19 @@ const App = () => (
                 <Route path="/lista-compras" element={<ProtectedRoute adminOnly><ListaCompras /></ProtectedRoute>} />
                 <Route path="/aniversariantes" element={<ProtectedRoute><Aniversariantes /></ProtectedRoute>} />
                 <Route path="/clientes" element={<ProtectedRoute><Clientes /></ProtectedRoute>} />
+
+                <Route path="/recuperacao" element={<ProtectedRoute><RecuperacaoLayout /></ProtectedRoute>}>
+                  <Route index element={<RecPainel />} />
+                  <Route path="painel" element={<RecPainel />} />
+                  <Route path="clientes" element={<RecClientes />} />
+                  <Route path="campanhas" element={<RecCampanhas />} />
+                  <Route path="automacoes" element={<RecAutomacoes />} />
+                  <Route path="integracoes" element={<RecIntegracoes />} />
+                  <Route path="relatorios" element={<RecRelatorios />} />
+                  <Route path="configuracoes" element={<RecConfiguracoes />} />
+                  <Route path="planos" element={<RecPlanos />} />
+                </Route>
+
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

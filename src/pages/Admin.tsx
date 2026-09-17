@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { formatBRL } from "@/lib/format";
-import { Plus, Pencil, Trash2, Tag, GripVertical, MapPin, Settings as SettingsIcon, Upload, ImageIcon, Loader2, Clock, Boxes, ClipboardList, Webhook, RotateCcw, AlertTriangle, Cake, Users } from "lucide-react";
+import { Plus, Pencil, Trash2, Tag, GripVertical, MapPin, Settings as SettingsIcon, Upload, ImageIcon, Loader2, Clock, Boxes, ClipboardList, Webhook, RotateCcw, AlertTriangle, Cake, Users, Megaphone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { BusinessHours, DEFAULT_HOURS, WEEKDAYS } from "@/lib/businessHours";
@@ -487,6 +487,11 @@ export default function Admin() {
           <Link to="/clientes">
             <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Clientes">
               <Users className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Link to="/recuperacao/painel">
+            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Recuperação de clientes">
+              <Megaphone className="h-5 w-5" />
             </Button>
           </Link>
           <Link to="/aniversariantes">

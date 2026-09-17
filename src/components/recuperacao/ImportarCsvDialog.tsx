@@ -13,9 +13,9 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { LgpdAviso } from "@/components/LgpdAviso";
-import { useStore } from "@/lib/store";
-import type { Cliente } from "@/lib/types";
+import { LgpdAviso } from "@/components/recuperacao/LgpdAviso";
+import { useStore } from "@/lib/recuperacao/store";
+import type { Cliente } from "@/lib/recuperacao/types";
 
 const EXEMPLO = `nome;telefone;ultima_compra;ultimo_pedido;ticket
 Ana Souza;(11) 98888-1122;2026-09-01;Smash Duplo + Batata;68
