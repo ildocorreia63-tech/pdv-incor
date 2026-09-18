@@ -30,7 +30,7 @@ export const AppHeader = ({ title, action, subAction }: { title?: string; action
       </div>
       {(subAction || (location.pathname !== "/pdv" && location.pathname !== "/" && location.pathname !== "/cozinha")) && (
         <div className="px-4 pb-3 flex gap-1 overflow-x-auto no-scrollbar">
-          {(location.pathname.startsWith("/admin") ||
+          {!subAction && (location.pathname.startsWith("/admin") ||
            location.pathname === "/relatorios" ||
            location.pathname === "/clientes" ||
            location.pathname === "/aniversariantes" ||
