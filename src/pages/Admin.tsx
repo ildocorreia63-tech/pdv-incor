@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { formatBRL } from "@/lib/format";
-import { Plus, Pencil, Trash2, Tag, GripVertical, MapPin, Settings as SettingsIcon, Upload, ImageIcon, Loader2, Clock, Boxes, ClipboardList, Webhook, RotateCcw, AlertTriangle, Cake, Users, Megaphone } from "lucide-react";
+import { Plus, Pencil, Trash2, Tags, GripVertical, Truck, Settings as SettingsIcon, Upload, ImageIcon, Loader2, Clock, Boxes, ChartNoAxesCombined, Webhook, RotateCcw, AlertTriangle, CakeSlice, UsersRound, Megaphone, PackageOpen, ShoppingBasket } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { BusinessHours, DEFAULT_HOURS, WEEKDAYS } from "@/lib/businessHours";
@@ -481,12 +481,12 @@ export default function Admin() {
         <>
           <Link to="/relatorios">
             <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Relatórios">
-              <ClipboardList className="h-5 w-5" />
+              <ChartNoAxesCombined className="h-5 w-5" />
             </Button>
           </Link>
           <Link to="/clientes">
             <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Clientes">
-              <Users className="h-5 w-5" />
+              <UsersRound className="h-5 w-5" />
             </Button>
           </Link>
           <Link to="/recuperacao/painel">
@@ -496,7 +496,7 @@ export default function Admin() {
           </Link>
           <Link to="/aniversariantes">
             <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Aniversariantes">
-              <Cake className="h-5 w-5" />
+              <CakeSlice className="h-5 w-5" />
             </Button>
           </Link>
           <Link to="/insumos">
@@ -506,7 +506,7 @@ export default function Admin() {
           </Link>
           <Link to="/lista-compras">
             <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Lista de Compras">
-              <Tag className="h-5 w-5" />
+              <ShoppingBasket className="h-5 w-5" />
             </Button>
           </Link>
           <Button
@@ -522,10 +522,20 @@ export default function Admin() {
             variant="outline"
             size="icon"
             className="h-10 w-10 shrink-0"
+            onClick={openNew}
+            title="Produtos"
+            aria-label="Adicionar produto"
+          >
+            <PackageOpen className="h-5 w-5" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 shrink-0"
             onClick={() => setZonesOpen(true)}
             title="Bairros / Taxas"
           >
-            <MapPin className="h-5 w-5" />
+            <Truck className="h-5 w-5" />
           </Button>
           <Button
             variant="outline"
@@ -534,7 +544,7 @@ export default function Admin() {
             onClick={() => setCatOpen(true)}
             title="Categorias"
           >
-            <Tag className="h-5 w-5" />
+            <Tags className="h-5 w-5" />
           </Button>
           <Button
             variant="outline"
@@ -553,15 +563,6 @@ export default function Admin() {
             title="Zerar Sistema"
           >
             <RotateCcw className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-10 w-10 shrink-0"
-            onClick={openNew}
-            title="Novo Produto"
-          >
-            <Plus className="h-5 w-5" />
           </Button>
         </>
       }

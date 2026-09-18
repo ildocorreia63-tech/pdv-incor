@@ -2,7 +2,7 @@ import defaultLogo from "@/assets/logo-1980.jpg";
 import { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { LogOut, ClipboardList, Users, Cake, Boxes, Tag, Settings as SettingsIcon, MapPin, RotateCcw, Plus, LayoutDashboard } from "lucide-react";
+import { LogOut, ChartNoAxesCombined, UsersRound, CakeSlice, Boxes, ShoppingBasket, LayoutDashboard } from "lucide-react";
 import { useStoreLogo } from "@/hooks/useStoreLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Link, useLocation } from "react-router-dom";
@@ -54,7 +54,7 @@ export const AppHeader = ({ title, action, subAction }: { title?: string; action
                   className="h-10 w-10 shrink-0" 
                   title="Relatórios"
                 >
-                  <ClipboardList className="h-5 w-5" />
+                  <ChartNoAxesCombined className="h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/clientes">
@@ -64,7 +64,7 @@ export const AppHeader = ({ title, action, subAction }: { title?: string; action
                   className="h-10 w-10 shrink-0" 
                   title="Clientes"
                 >
-                  <Users className="h-5 w-5" />
+                  <UsersRound className="h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/aniversariantes">
@@ -74,7 +74,7 @@ export const AppHeader = ({ title, action, subAction }: { title?: string; action
                   className="h-10 w-10 shrink-0" 
                   title="Aniversariantes"
                 >
-                  <Cake className="h-5 w-5" />
+                  <CakeSlice className="h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/insumos">
@@ -94,7 +94,7 @@ export const AppHeader = ({ title, action, subAction }: { title?: string; action
                   className="h-10 w-10 shrink-0" 
                   title="Lista de Compras"
                 >
-                  <Tag className="h-5 w-5" />
+                  <ShoppingBasket className="h-5 w-5" />
                 </Button>
               </Link>
             </>
