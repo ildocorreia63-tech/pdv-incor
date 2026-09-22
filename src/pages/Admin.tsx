@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatBRL } from "@/lib/format";
 import { Plus, Pencil, Trash2, Tags, GripVertical, Truck, Settings as SettingsIcon, Upload, ImageIcon, Loader2, Clock, Boxes, ChartNoAxesCombined, Webhook, RotateCcw, AlertTriangle, CakeSlice, UsersRound, Megaphone, PackageOpen, ShoppingBasket } from "lucide-react";
 import { Link } from "react-router-dom";
+import { TooltipIconButton } from "@/components/TooltipIconButton";
 import { toast } from "sonner";
 import { BusinessHours, DEFAULT_HOURS, WEEKDAYS } from "@/lib/businessHours";
 import { cn } from "@/lib/utils";
