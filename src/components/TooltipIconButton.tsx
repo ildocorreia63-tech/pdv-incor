@@ -29,7 +29,8 @@ export const TooltipIconButton = ({
 }: TooltipIconButtonProps) => {
   const [open, setOpen] = useState(false);
   const pressTimer = useRef<number | null>(null);
-  const longPressed = useRef(false);
+  // Momento-limite até o qual o clique gerado após um toque longo deve ser ignorado.
+  const suppressClickUntil = useRef(0);
 
   const clearPress = () => {
     if (pressTimer.current !== null) {
@@ -39,9 +40,8 @@ export const TooltipIconButton = ({
   };
 
   const handleTouchStart = () => {
-    longPressed.current = false;
     pressTimer.current = window.setTimeout(() => {
-      longPressed.current = true;
+      suppressClickUntil.current = Date.now() + 600;
       setOpen(true);
       // Feedback tátil sutil, quando disponível.
       if (typeof navigator !== "undefined" && "vibrate" in navigator) {
@@ -50,14 +50,9 @@ export const TooltipIconButton = ({
     }, 400);
   };
 
-  const handleTouchEnd = () => {
-    clearPress();
-    // Se o tooltip foi aberto por toque longo, o toque não deve navegar.
-    if (longPressed.current) {
-      longPressed.current = false;
-      onClick?.();
-      return;
-    }
+  const handleClick = () => {
+    if (Date.now() < suppressClickUntil.current) return;
+    onClick?.();
   };
 
   return (
@@ -68,13 +63,15 @@ export const TooltipIconButton = ({
           size="icon"
           className={cn("h-10 w-10 shrink-0", className)}
           aria-label={ariaLabel ?? label}
-          onClick={onClick}
+          onClick={handleClick}
           onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
+          onTouchEnd={clearPress}
           onTouchCancel={clearPress}
           onContextMenu={(e) => {
             // Evita o menu nativo ao segurar no celular.
-            if (pressTimer.current !== null || longPressed.current) e.preventDefault();
+            if (pressTimer.current !== null || Date.now() < suppressClickUntil.current) {
+              e.preventDefault();
+            }
           }}
         >
           {children}
