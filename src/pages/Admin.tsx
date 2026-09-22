@@ -480,90 +480,53 @@ export default function Admin() {
       subAction={
         <>
           <Link to="/relatorios">
-            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Relatórios">
+            <TooltipIconButton label="Relatórios">
               <ChartNoAxesCombined className="h-5 w-5" />
-            </Button>
+            </TooltipIconButton>
           </Link>
           <Link to="/clientes">
-            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Clientes">
+            <TooltipIconButton label="Clientes">
               <UsersRound className="h-5 w-5" />
-            </Button>
+            </TooltipIconButton>
           </Link>
           <Link to="/recuperacao/painel">
-            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Recuperação de clientes">
+            <TooltipIconButton label="Recuperação de clientes">
               <Megaphone className="h-5 w-5" />
-            </Button>
+            </TooltipIconButton>
           </Link>
           <Link to="/aniversariantes">
-            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Aniversariantes">
+            <TooltipIconButton label="Aniversariantes">
               <CakeSlice className="h-5 w-5" />
-            </Button>
+            </TooltipIconButton>
           </Link>
           <Link to="/insumos">
-            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Insumos">
+            <TooltipIconButton label="Insumos">
               <Boxes className="h-5 w-5" />
-            </Button>
+            </TooltipIconButton>
           </Link>
           <Link to="/lista-compras">
-            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" title="Lista de Compras">
+            <TooltipIconButton label="Lista de Compras">
               <ShoppingBasket className="h-5 w-5" />
-            </Button>
+            </TooltipIconButton>
           </Link>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-10 w-10 shrink-0"
-            onClick={() => setSettingsOpen(true)}
-            title="Configurações"
-          >
+          <TooltipIconButton label="Configurações" onClick={() => setSettingsOpen(true)}>
             <SettingsIcon className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-10 w-10 shrink-0"
-            onClick={openNew}
-            title="Produtos"
-            aria-label="Adicionar produto"
-          >
+          </TooltipIconButton>
+          <TooltipIconButton label="Produtos" ariaLabel="Adicionar produto" onClick={openNew}>
             <PackageOpen className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-10 w-10 shrink-0"
-            onClick={() => setZonesOpen(true)}
-            title="Bairros / Taxas"
-          >
+          </TooltipIconButton>
+          <TooltipIconButton label="Bairros / Taxas" onClick={() => setZonesOpen(true)}>
             <Truck className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-10 w-10 shrink-0"
-            onClick={() => setCatOpen(true)}
-            title="Categorias"
-          >
+          </TooltipIconButton>
+          <TooltipIconButton label="Categorias" onClick={() => setCatOpen(true)}>
             <Tags className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-10 w-10 shrink-0"
-            onClick={() => setSimOpen(true)}
-            title="Testar webhook Asaas"
-          >
+          </TooltipIconButton>
+          <TooltipIconButton label="Testar webhook Asaas" onClick={() => setSimOpen(true)}>
             <Webhook className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-10 w-10 shrink-0 text-destructive"
-            onClick={() => setResetOpen(true)}
-            title="Zerar Sistema"
-          >
+          </TooltipIconButton>
+          <TooltipIconButton label="Zerar Sistema" className="text-destructive" onClick={() => setResetOpen(true)}>
             <RotateCcw className="h-5 w-5" />
-          </Button>
+          </TooltipIconButton>
         </>
       }
     >
