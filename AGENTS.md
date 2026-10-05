@@ -1,2 +1,4 @@
-
 - Playwright + sessão do app: além da chave de auth, gravar também a chave `-user` (localStorage) com `{user}` — sem ela o supabase-js lança `Cannot create property 'user' on string` e o app cai em /auth.
+- Multi-loja: toda tabela operacional tem `store_id` (default `current_store_id()`) e uma política RESTRICTIVE `is_store_member(store_id)`; novas tabelas devem seguir o mesmo padrão — garante isolamento entre lojas sem reescrever as políticas antigas.
+- Lojas são criadas só pela RPC `create_store` (valida link, cria membro dono e configurações) — evita inserts diretos inconsistentes.
+- Usuário logado sem loja é enviado a /criar-loja pelo ProtectedRoute — toda tela interna pressupõe uma loja ativa.
