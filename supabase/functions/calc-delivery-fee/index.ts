@@ -9,7 +9,11 @@ const GATEWAY = "https://connector-gateway.lovable.dev/google_maps";
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
 const GMAPS_KEY = Deno.env.get("GOOGLE_MAPS_API_KEY") ?? "";
 
-const BodySchema = z.object({ address: z.string().min(5).max(300) });
+const BodySchema = z.object({
+  address: z.string().min(5).max(300),
+  // link da loja; sem ele usa a loja padrão
+  store_slug: z.string().regex(/^[a-z0-9-]{3,40}$/).optional(),
+});
 
 type Tier = {
   max_km: number;
@@ -51,14 +55,21 @@ Deno.serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const { address } = parsed.data;
+    const { address, store_slug } = parsed.data;
 
     const url = Deno.env.get("SUPABASE_URL")!;
     const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(url, key);
+    const storeQ = supabase.from("stores").select("id").limit(1);
+    const { data: storeRow } = store_slug
+      ? await storeQ.eq("slug", store_slug).maybeSingle()
+      : await storeQ.eq("is_default", true).maybeSingle();
+    if (!storeRow) throw new Error("Loja não encontrada");
     const { data: settings, error: sErr } = await supabase
       .from("store_settings")
       .select("id, delivery_mode, store_address, store_lat, store_lng, delivery_km_tiers")
+      .eq("store_id", storeRow.id)
+      .limit(1)
       .maybeSingle();
     if (sErr) throw sErr;
     if (!settings) throw new Error("Configurações da loja não encontradas");

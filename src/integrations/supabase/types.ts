@@ -1147,6 +1147,7 @@ export type Database = {
           whatsapp_number: string
         }[]
       }
+      get_store_by_slug: { Args: { _slug: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

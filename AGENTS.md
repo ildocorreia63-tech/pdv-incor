@@ -2,3 +2,4 @@
 - Multi-loja: toda tabela operacional tem `store_id` (default `current_store_id()`) e uma política RESTRICTIVE `is_store_member(store_id)`; novas tabelas devem seguir o mesmo padrão — garante isolamento entre lojas sem reescrever as políticas antigas.
 - Lojas são criadas só pela RPC `create_store` (valida link, cria membro dono e configurações) — evita inserts diretos inconsistentes.
 - Usuário logado sem loja é enviado a /criar-loja pelo ProtectedRoute — toda tela interna pressupõe uma loja ativa.
+- Cardápio público por loja: cliente anônimo separado (src/lib/storeClient.ts) envia o cabeçalho `x-store-slug`, lido por `current_store_id()` — o mesmo código do cardápio serve todas as lojas sem misturar dados.
