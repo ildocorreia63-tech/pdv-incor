@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getStoreClient } from "@/lib/storeClient";
 import logo from "@/assets/logo-1980.jpg";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,7 +62,9 @@ type Settings = {
   show_whatsapp_link?: boolean | null; show_login_button?: boolean | null;
 };
 
-export default function Cardapio() {
+export default function Cardapio({ storeSlug }: { storeSlug?: string } = {}) {
+  // cardápio de uma loja específica (link /loja/:slug) ou da loja padrão
+  const db = useMemo(() => (storeSlug ? getStoreClient(storeSlug) : supabase), [storeSlug]);
   const [products, setProducts] = useState<Product[]>([]);
   const [cats, setCats] = useState<Category[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
@@ -139,7 +142,7 @@ export default function Cardapio() {
 
     setSavingProfile(true);
     try {
-      const { error } = await supabase.rpc("upsert_customer_profile", {
+      const { error } = await db.rpc("upsert_customer_profile", {
         _data: {
           name: name.trim(),
           phone: phoneDigits,
@@ -211,9 +214,9 @@ export default function Cardapio() {
   useEffect(() => {
     (async () => {
       const [c, z, s] = await Promise.all([
-        supabase.from("categories").select("id,name").order("sort_order"),
-        supabase.from("delivery_zones").select("id,name,fee").eq("active", true).order("sort_order"),
-        supabase.from("public_store_settings" as any).select("store_name,whatsapp_number,welcome_message,menu_open,business_hours,banner_url,banner_enabled,logo_url,delivery_mode,store_address,delivery_km_tiers,min_order_value,show_min_order,rating,show_rating,show_whatsapp_link,show_login_button").maybeSingle(),
+        db.from("categories").select("id,name").order("sort_order"),
+        db.from("delivery_zones").select("id,name,fee").eq("active", true).order("sort_order"),
+        db.from("public_store_settings" as any).select("store_name,whatsapp_number,welcome_message,menu_open,business_hours,banner_url,banner_enabled,logo_url,delivery_mode,store_address,delivery_km_tiers,min_order_value,show_min_order,rating,show_rating,show_whatsapp_link,show_login_button").maybeSingle(),
       ]);
       setCats(c.data ?? []);
       setZones((z.data ?? []).map((x) => ({ ...x, fee: Number(x.fee) })));
@@ -225,11 +228,11 @@ export default function Cardapio() {
       .channel("cardapio_products")
       .on("postgres_changes", { event: "*", schema: "public", table: "products" }, () => loadProducts())
       .on("postgres_changes", { event: "*", schema: "public", table: "categories" }, async () => {
-        const { data } = await supabase.from("categories").select("id,name").order("sort_order");
+        const { data } = await db.from("categories").select("id,name").order("sort_order");
         setCats(data ?? []);
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { db.removeChannel(channel); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -279,7 +282,7 @@ export default function Cardapio() {
     setKmQuote(null);
     try {
       const address = `${street.trim()}, ${number.trim()}${complement.trim() ? " " + complement.trim() : ""}${reference.trim() ? " - " + reference.trim() : ""}, Brasil`;
-      const { data, error } = await supabase.functions.invoke("calc-delivery-fee", { body: { address } });
+      const { data, error } = await db.functions.invoke("calc-delivery-fee", { body: { address, store_slug: storeSlug } });
       if (error) {
         const ctx: any = (error as any).context;
         let details = error.message;
@@ -335,12 +338,12 @@ export default function Cardapio() {
       setPixChecking(true);
       try {
         // 1) força reconciliação com Asaas (webhook pode ter atrasado)
-        await supabase.functions.invoke("asaas-check-payment", {
+        await db.functions.invoke("asaas-check-payment", {
           body: { order_id: pendingOrder.id, trace_id },
         }).catch(() => { /* silencioso — o passo 2 confirma pelo banco */ });
 
         // 2) lê o estado autoritativo do banco
-        const { data } = await supabase.rpc("get_online_order_status", { _id: pendingOrder.id });
+        const { data } = await db.rpc("get_online_order_status", { _id: pendingOrder.id });
         if (cancelled || !data) return;
         const row = data as any;
 
@@ -523,7 +526,7 @@ export default function Cardapio() {
         payment_method: paymentMethod,
         payment_change_for: changeForNum,
       };
-      const { data: rpcData, error } = await supabase.rpc("create_online_order", {
+      const { data: rpcData, error } = await db.rpc("create_online_order", {
         _order: orderPayload as any,
         _items: itemsPayload as any,
       });
@@ -541,7 +544,7 @@ export default function Cardapio() {
       if (paymentMethod === "pix") {
         stage = "asaas_create_pix";
         logEvent(trace_id, scope, stage, "Chamando edge function asaas-create-pix", "info", { order_id: order.id });
-        const { data: pix, error: pixErr } = await supabase.functions.invoke("asaas-create-pix", {
+        const { data: pix, error: pixErr } = await db.functions.invoke("asaas-create-pix", {
           body: { order_id: order.id, trace_id, cpf: cpfDigits },
         });
 
@@ -568,7 +571,7 @@ export default function Cardapio() {
       } else if (paymentMethod === "credit" || paymentMethod === "debit") {
         stage = "asaas_create_card";
         logEvent(trace_id, scope, stage, "Chamando edge function asaas-create-card", "info", { order_id: order.id, kind: paymentMethod });
-        const { data: card, error: cardErr } = await supabase.functions.invoke("asaas-create-card", {
+        const { data: card, error: cardErr } = await db.functions.invoke("asaas-create-card", {
           body: { order_id: order.id, kind: paymentMethod, trace_id, cpf: cpfDigits },
         });
         if (cardErr || card?.error) {

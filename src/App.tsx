@@ -38,6 +38,7 @@ const RecConfiguracoes = lazy(() => import("./pages/recuperacao/configuracoes"))
 const RecPlanos = lazy(() => import("./pages/recuperacao/planos"));
 const Planos = lazy(() => import("./pages/Planos"));
 const CriarLoja = lazy(() => import("./pages/CriarLoja"));
+const LojaPublica = lazy(() => import("./pages/LojaPublica"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -75,6 +76,7 @@ const App = () => (
               <Routes>
                 <Route path="/cardapio" element={<Cardapio />} />
                 <Route path="/planos" element={<Planos />} />
+                <Route path="/loja/:slug" element={<LojaPublica />} />
                 <Route path="/criar-loja" element={<CriarLoja />} />
                 <Route path="/acompanhar/:orderId" element={<Acompanhar />} />
                 <Route path="/auth" element={<Auth />} />
