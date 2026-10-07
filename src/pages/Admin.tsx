@@ -721,6 +721,26 @@ export default function Admin() {
         <DialogContent className="max-h-[90vh] flex flex-col p-0">
           <DialogHeader className="p-4 pb-2"><DialogTitle>Configurações do cardápio online</DialogTitle></DialogHeader>
           <div className="space-y-3 overflow-y-auto px-4 pb-4 flex-1">
+            {menuUrl && (
+              <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
+                <Label>Link público do cardápio</Label>
+                <div className="flex items-center gap-2">
+                  <Input readOnly value={menuUrl} className="text-xs" onFocus={(e) => e.target.select()} />
+                  <Button size="icon" variant="outline" className="shrink-0" onClick={copyMenuLink} aria-label="Copiar link">
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button size="icon" variant="outline" className="shrink-0" onClick={shareMenuLink} aria-label="Compartilhar link">
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                  <Button size="icon" variant="outline" className="shrink-0" asChild>
+                    <a href={menuUrl} target="_blank" rel="noreferrer" aria-label="Abrir cardápio">
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground">Envie este link aos clientes pelo WhatsApp, Instagram ou QR code.</p>
+              </div>
+            )}
             <div><Label>Nome da loja</Label><Input value={storeName} onChange={(e) => setStoreName(e.target.value)} /></div>
             <div>
               <Label>WhatsApp da loja</Label>
