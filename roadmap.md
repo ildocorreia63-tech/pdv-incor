@@ -6,7 +6,8 @@
 - [x] Cardápio por link /loja/<link> (produtos, preços, configurações, pedidos e taxa por loja)
 - [ ] Pix Asaas por loja (hoje usa a chave Asaas da plataforma)
 - [ ] Assinatura Stripe (bloqueado: pagamentos integrados exigem plano pago do Lovable)
-- [ ] Tela "Minha assinatura" e bloqueios por plano
+- [x] Tela "Minha assinatura" (/assinatura) — plano atual, dias de teste, troca de plano
+- [ ] Bloqueios por plano (cadeado nos recursos fora do plano)
 - [ ] Painel do dono da plataforma
 - [ ] Convite de operadores por e-mail
 - [ ] Recuperação de clientes salva por loja no banco
