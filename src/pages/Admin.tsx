@@ -9,7 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { formatBRL } from "@/lib/format";
-import { Plus, Pencil, Trash2, Tags, GripVertical, Truck, Settings as SettingsIcon, Upload, ImageIcon, Loader2, Clock, Boxes, ChartNoAxesCombined, Webhook, RotateCcw, AlertTriangle, CakeSlice, UsersRound, Megaphone, PackageOpen, ShoppingBasket } from "lucide-react";
+import { Plus, Pencil, Trash2, Tags, GripVertical, Truck, Settings as SettingsIcon, Upload, ImageIcon, Loader2, Clock, Boxes, ChartNoAxesCombined, Webhook, RotateCcw, AlertTriangle, CakeSlice, UsersRound, Megaphone, PackageOpen, ShoppingBasket, Copy, Share2, ExternalLink } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { TooltipIconButton } from "@/components/TooltipIconButton";
 import { toast } from "sonner";
@@ -44,6 +45,29 @@ function SortableCategoryRow({ cat, count, onRemove }: { cat: Category & { items
 }
 
 export default function Admin() {
+  const { store } = useAuth();
+  const menuUrl = store ? `${window.location.origin}/loja/${store.slug}` : null;
+  const copyMenuLink = async () => {
+    if (!menuUrl) return;
+    try {
+      await navigator.clipboard.writeText(menuUrl);
+      toast.success("Link do cardápio copiado");
+    } catch {
+      toast.error("Não foi possível copiar o link");
+    }
+  };
+  const shareMenuLink = async () => {
+    if (!menuUrl) return;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `Cardápio — ${store?.name ?? "Minha loja"}`, text: "Faça seu pedido pelo nosso cardápio online:", url: menuUrl });
+      } catch {
+        /* usuário cancelou o compartilhamento */
+      }
+    } else {
+      await copyMenuLink();
+    }
+  };
   const [products, setProducts] = useState<Product[]>([]);
   const [cats, setCats] = useState<Category[]>([]);
   const [open, setOpen] = useState(false);
@@ -697,6 +721,26 @@ export default function Admin() {
         <DialogContent className="max-h-[90vh] flex flex-col p-0">
           <DialogHeader className="p-4 pb-2"><DialogTitle>Configurações do cardápio online</DialogTitle></DialogHeader>
           <div className="space-y-3 overflow-y-auto px-4 pb-4 flex-1">
+            {menuUrl && (
+              <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
+                <Label>Link público do cardápio</Label>
+                <div className="flex items-center gap-2">
+                  <Input readOnly value={menuUrl} className="text-xs" onFocus={(e) => e.target.select()} />
+                  <Button size="icon" variant="outline" className="shrink-0" onClick={copyMenuLink} aria-label="Copiar link">
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button size="icon" variant="outline" className="shrink-0" onClick={shareMenuLink} aria-label="Compartilhar link">
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                  <Button size="icon" variant="outline" className="shrink-0" asChild>
+                    <a href={menuUrl} target="_blank" rel="noreferrer" aria-label="Abrir cardápio">
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground">Envie este link aos clientes pelo WhatsApp, Instagram ou QR code.</p>
+              </div>
+            )}
             <div><Label>Nome da loja</Label><Input value={storeName} onChange={(e) => setStoreName(e.target.value)} /></div>
             <div>
               <Label>WhatsApp da loja</Label>
