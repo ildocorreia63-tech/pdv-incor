@@ -655,6 +655,21 @@ export type Database = {
           },
         ]
       }
+      platform_admins: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       product_recipes: {
         Row: {
           created_at: string
@@ -1156,8 +1171,19 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_platform_admin: { Args: never; Returns: boolean }
       is_store_admin: { Args: { _store_id: string }; Returns: boolean }
       is_store_member: { Args: { _store_id: string }; Returns: boolean }
+      platform_list_stores: { Args: never; Returns: Json }
+      platform_update_store: {
+        Args: {
+          _extend_days?: number
+          _id: string
+          _plan: string
+          _status: string
+        }
+        Returns: undefined
+      }
       reset_operational_data: {
         Args: { _reset_stock?: boolean }
         Returns: Json
