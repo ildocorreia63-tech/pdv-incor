@@ -45,6 +45,29 @@ function SortableCategoryRow({ cat, count, onRemove }: { cat: Category & { items
 }
 
 export default function Admin() {
+  const { store } = useAuth();
+  const menuUrl = store ? `${window.location.origin}/loja/${store.slug}` : null;
+  const copyMenuLink = async () => {
+    if (!menuUrl) return;
+    try {
+      await navigator.clipboard.writeText(menuUrl);
+      toast.success("Link do cardápio copiado");
+    } catch {
+      toast.error("Não foi possível copiar o link");
+    }
+  };
+  const shareMenuLink = async () => {
+    if (!menuUrl) return;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `Cardápio — ${store?.name ?? "Minha loja"}`, text: "Faça seu pedido pelo nosso cardápio online:", url: menuUrl });
+      } catch {
+        /* usuário cancelou o compartilhamento */
+      }
+    } else {
+      await copyMenuLink();
+    }
+  };
   const [products, setProducts] = useState<Product[]>([]);
   const [cats, setCats] = useState<Category[]>([]);
   const [open, setOpen] = useState(false);
