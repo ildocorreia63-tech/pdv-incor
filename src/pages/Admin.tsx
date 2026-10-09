@@ -47,6 +47,8 @@ function SortableCategoryRow({ cat, count, onRemove }: { cat: Category & { items
 export default function Admin() {
   const { store } = useAuth();
   const menuUrl = store ? `${window.location.origin}/loja/${store.slug}` : null;
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
+  useEffect(() => { supabase.rpc("is_platform_admin").then(({ data }) => setIsPlatformAdmin(data === true)); }, []);
   const copyMenuLink = async () => {
     if (!menuUrl) return;
     try {
