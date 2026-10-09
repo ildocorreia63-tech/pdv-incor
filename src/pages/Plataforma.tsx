@@ -58,7 +58,7 @@ export default function Plataforma() {
     return q ? list.filter((s) => `${s.name} ${s.slug} ${s.owner_email ?? ""}`.toLowerCase().includes(q)) : list;
   }, [list, busca]);
   const pagantes = list.filter((s) => s.subscription_status === "active" && !s.is_default);
-  const mrr = pagantes.reduce((t, s) => t + (PLANS.find((p) => p.id === s.plan)?.price ?? 0), 0);
+  const mrr = pagantes.reduce((t, s) => t + (PLANS.find((p) => p.id === s.plan)?.monthly ?? 0), 0);
   const emTeste = list.filter((s) => s.subscription_status === "trialing").length;
 
   if (access.isLoading) return <div className="flex justify-center p-10"><Loader2 className="h-6 w-6 animate-spin" /></div>;

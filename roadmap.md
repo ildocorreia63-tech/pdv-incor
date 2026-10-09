@@ -8,6 +8,6 @@
 - [ ] Assinatura Stripe (bloqueado: pagamentos integrados exigem plano pago do Lovable)
 - [x] Tela "Minha assinatura" (/assinatura) — plano atual, dias de teste, troca de plano
 - [ ] Bloqueios por plano (cadeado nos recursos fora do plano)
-- [ ] Painel do dono da plataforma
+- [x] Painel do dono da plataforma
 - [ ] Convite de operadores por e-mail
 - [ ] Recuperação de clientes salva por loja no banco

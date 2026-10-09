@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { formatBRL } from "@/lib/format";
-import { Plus, Pencil, Trash2, Tags, GripVertical, Truck, Settings as SettingsIcon, Upload, ImageIcon, Loader2, Clock, Boxes, ChartNoAxesCombined, Webhook, RotateCcw, AlertTriangle, CakeSlice, UsersRound, Megaphone, PackageOpen, ShoppingBasket, Copy, Share2, ExternalLink, Crown } from "lucide-react";
+import { Plus, Pencil, Trash2, Tags, GripVertical, Truck, Settings as SettingsIcon, Upload, ImageIcon, Loader2, Clock, Boxes, ChartNoAxesCombined, Webhook, RotateCcw, AlertTriangle, CakeSlice, UsersRound, Megaphone, PackageOpen, ShoppingBasket, Copy, Share2, ExternalLink, Crown, Building2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { TooltipIconButton } from "@/components/TooltipIconButton";
@@ -47,6 +47,8 @@ function SortableCategoryRow({ cat, count, onRemove }: { cat: Category & { items
 export default function Admin() {
   const { store } = useAuth();
   const menuUrl = store ? `${window.location.origin}/loja/${store.slug}` : null;
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
+  useEffect(() => { supabase.rpc("is_platform_admin").then(({ data }) => setIsPlatformAdmin(data === true)); }, []);
   const copyMenuLink = async () => {
     if (!menuUrl) return;
     try {
@@ -534,6 +536,13 @@ export default function Admin() {
               <ShoppingBasket className="h-5 w-5" />
             </TooltipIconButton>
           </Link>
+          {isPlatformAdmin && (
+            <Link to="/plataforma">
+              <TooltipIconButton label="Painel da plataforma">
+                <Building2 className="h-5 w-5" />
+              </TooltipIconButton>
+            </Link>
+          )}
           <Link to="/assinatura">
             <TooltipIconButton label="Minha assinatura">
               <Crown className="h-5 w-5" />
