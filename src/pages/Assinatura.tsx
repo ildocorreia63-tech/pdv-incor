@@ -1,11 +1,13 @@
-import { Link } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
-import { PLANS, TRIAL_DAYS, annualPrice, brl } from "@/lib/plans";
-import { Check, Crown, CalendarClock, ArrowUpCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { PLANS, STRIPE_PRICES, TRIAL_DAYS, annualPrice, brl } from "@/lib/plans";
+import { Check, Crown, CalendarClock, ArrowUpCircle, CreditCard, RefreshCw, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STATUS_LABEL: Record<string, { label: string; tone: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -21,11 +23,43 @@ const daysLeft = (iso: string): number => {
   return Math.max(0, Math.ceil(ms / 86_400_000));
 };
 
-/** Tela "Minha assinatura": plano atual da loja, validade e opções de upgrade. */
+type Cycle = "monthly" | "annual";
+
+/** Tela "Minha assinatura": plano atual da loja, validade e assinatura via Stripe. */
 export default function Assinatura() {
-  const { store } = useAuth();
+  const { store, refreshStore } = useAuth();
+  const [cycle, setCycle] = useState<Cycle>("monthly");
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const sync = useCallback(async () => {
+    const { error } = await supabase.functions.invoke("check-subscription");
+    if (!error) await refreshStore();
+  }, [refreshStore]);
+
+  useEffect(() => {
+    void sync();
+    if (new URLSearchParams(window.location.search).get("checkout") === "ok") {
+      toast.success("Pagamento recebido! Atualizando seu plano…");
+    }
+    const t = window.setInterval(() => void sync(), 60_000);
+    return () => window.clearInterval(t);
+  }, [sync]);
+
+  const openUrl = async (fn: string, body?: Record<string, string>, key = fn) => {
+    setBusy(key);
+    try {
+      const { data, error } = await supabase.functions.invoke(fn, { body });
+      if (error || !data?.url) throw new Error(data?.error ?? error?.message ?? "Falha");
+      window.open(data.url, "_blank");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível abrir o pagamento");
+    } finally {
+      setBusy(null);
+    }
+  };
 
   if (!store) return null;
+  const paying = store.subscription_status === "active" || store.subscription_status === "past_due";
 
   const currentPlan = PLANS.find((p) => p.id === store.plan);
   const status = STATUS_LABEL[store.subscription_status] ?? STATUS_LABEL.active;
@@ -72,13 +106,33 @@ export default function Assinatura() {
                 ))}
               </ul>
             )}
+            <div className="flex flex-wrap gap-2 pt-1">
+              {paying && !store.is_default && (
+                <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => openUrl("customer-portal")}>
+                  <CreditCard className="mr-1 h-4 w-4" aria-hidden /> Gerenciar assinatura
+                </Button>
+              )}
+              <Button size="sm" variant="ghost" onClick={() => void sync()}>
+                <RefreshCw className="mr-1 h-4 w-4" aria-hidden /> Atualizar situação
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
-        <h2 className="text-lg font-semibold text-foreground">Trocar de plano</h2>
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold text-foreground">{paying ? "Trocar de plano" : "Assinar um plano"}</h2>
+          <div className="flex rounded-md border border-border p-0.5" role="group" aria-label="Ciclo de cobrança">
+            {(["monthly", "annual"] as const).map((c) => (
+              <Button key={c} size="sm" variant={cycle === c ? "default" : "ghost"} className="h-7 px-3" onClick={() => setCycle(c)}>
+                {c === "monthly" ? "Mensal" : "Anual (-2 meses)"}
+              </Button>
+            ))}
+          </div>
+        </div>
         <div className="grid grid-cols-1 gap-3">
           {PLANS.map((p) => {
-            const isCurrent = p.id === store.plan;
+            const isCurrent = p.id === store.plan && paying;
+            const priceId = STRIPE_PRICES[p.id][cycle];
             return (
               <Card key={p.id} className={cn(isCurrent && "border-primary")}>
                 <CardContent className="flex items-center justify-between gap-3 p-4">
@@ -88,15 +142,18 @@ export default function Assinatura() {
                       {isCurrent && <span className="ml-2 text-xs font-normal text-primary">(atual)</span>}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {brl(p.monthly)}/mês · ou {brl(annualPrice(p.monthly))}/ano
+                      {cycle === "monthly" ? `${brl(p.monthly)}/mês` : `${brl(annualPrice(p.monthly))}/ano`}
                     </p>
                   </div>
-                  {!isCurrent && (
-                    <Button size="sm" variant={p.highlight ? "default" : "outline"} asChild>
-                      <Link to="/planos">
-                        <ArrowUpCircle className="mr-1 h-4 w-4" aria-hidden />
-                        Assinar
-                      </Link>
+                  {!isCurrent && !store.is_default && (
+                    <Button
+                      size="sm"
+                      variant={p.highlight ? "default" : "outline"}
+                      disabled={busy !== null}
+                      onClick={() => (paying ? openUrl("customer-portal", undefined, priceId) : openUrl("create-checkout", { price_id: priceId }, priceId))}
+                    >
+                      {busy === priceId ? <Loader2 className="mr-1 h-4 w-4 animate-spin" aria-hidden /> : <ArrowUpCircle className="mr-1 h-4 w-4" aria-hidden />}
+                      {paying ? "Trocar" : "Assinar"}
                     </Button>
                   )}
                 </CardContent>
