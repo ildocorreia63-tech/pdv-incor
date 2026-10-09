@@ -34,6 +34,13 @@ export const PLANS: PlanDef[] = [
 /** Anual = 10x o mensal (2 meses grátis). */
 export const annualPrice = (monthly: number): number => monthly * 10;
 
+/** Preços do Stripe por plano e ciclo de cobrança. */
+export const STRIPE_PRICES: Record<PlanDef["id"], { monthly: string; annual: string }> = {
+  essencial: { monthly: "price_1UOTEiK6dWpoRPc0slHmzcfC", annual: "price_1UOTFCK6dWpoRPc0eQqljwhA" },
+  pro: { monthly: "price_1UOTFGK6dWpoRPc0YPABsDzJ", annual: "price_1UOTFNK6dWpoRPc0ISUex4OO" },
+  premium: { monthly: "price_1UOTFHK6dWpoRPc0pv8u8bTn", annual: "price_1UOTFOK6dWpoRPc07v2i3oMO" },
+};
+
 export const brl = (v: number): string =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
