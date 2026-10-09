@@ -40,6 +40,7 @@ const Planos = lazy(() => import("./pages/Planos"));
 const CriarLoja = lazy(() => import("./pages/CriarLoja"));
 const LojaPublica = lazy(() => import("./pages/LojaPublica"));
 const Assinatura = lazy(() => import("./pages/Assinatura"));
+const Plataforma = lazy(() => import("./pages/Plataforma"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -95,6 +96,7 @@ const App = () => (
                 <Route path="/aniversariantes" element={<ProtectedRoute><Aniversariantes /></ProtectedRoute>} />
                 <Route path="/clientes" element={<ProtectedRoute><Clientes /></ProtectedRoute>} />
                 <Route path="/assinatura" element={<ProtectedRoute><Assinatura /></ProtectedRoute>} />
+                <Route path="/plataforma" element={<ProtectedRoute><Plataforma /></ProtectedRoute>} />
 
                 <Route path="/recuperacao" element={<ProtectedRoute><RecuperacaoLayout /></ProtectedRoute>}>
                   <Route index element={<RecPainel />} />
