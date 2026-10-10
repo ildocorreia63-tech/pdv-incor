@@ -11,6 +11,7 @@ export interface StoreInfo {
   subscription_status: "trialing" | "active" | "past_due" | "canceled" | "expired";
   trial_ends_at: string;
   current_period_end: string | null;
+  is_default: boolean;
   memberRole: "owner" | "admin" | "operator";
 }
 
@@ -32,7 +33,7 @@ async function loadAccess(userId: string): Promise<{ isAdmin: boolean; store: St
     supabase.from("user_roles").select("role").eq("user_id", userId),
     supabase
       .from("store_members")
-      .select("role, stores(id, slug, name, plan, subscription_status, trial_ends_at, current_period_end)")
+      .select("role, stores(id, slug, name, plan, subscription_status, trial_ends_at, current_period_end, is_default)")
       .eq("user_id", userId)
       .order("created_at")
       .limit(1)
