@@ -13,6 +13,7 @@ import { Plus, Pencil, Trash2, Tags, GripVertical, Truck, Settings as SettingsIc
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { TooltipIconButton } from "@/components/TooltipIconButton";
+import { LockBadge } from "@/components/PlanGate";
 import { toast } from "sonner";
 import { BusinessHours, DEFAULT_HOURS, WEEKDAYS } from "@/lib/businessHours";
 import { cn } from "@/lib/utils";
@@ -517,23 +518,27 @@ export default function Admin() {
             </TooltipIconButton>
           </Link>
           <Link to="/recuperacao/painel">
-            <TooltipIconButton label="Recuperação de clientes">
+            <TooltipIconButton label="Recuperação de clientes" className="relative">
               <Megaphone className="h-5 w-5" />
+              <LockBadge feature="recuperacao" />
             </TooltipIconButton>
           </Link>
           <Link to="/aniversariantes">
-            <TooltipIconButton label="Aniversariantes">
+            <TooltipIconButton label="Aniversariantes" className="relative">
               <CakeSlice className="h-5 w-5" />
+              <LockBadge feature="aniversariantes" />
             </TooltipIconButton>
           </Link>
           <Link to="/insumos">
-            <TooltipIconButton label="Insumos">
+            <TooltipIconButton label="Insumos" className="relative">
               <Boxes className="h-5 w-5" />
+              <LockBadge feature="insumos" />
             </TooltipIconButton>
           </Link>
           <Link to="/lista-compras">
-            <TooltipIconButton label="Lista de Compras">
+            <TooltipIconButton label="Lista de Compras" className="relative">
               <ShoppingBasket className="h-5 w-5" />
+              <LockBadge feature="insumos" />
             </TooltipIconButton>
           </Link>
           {isPlatformAdmin && (

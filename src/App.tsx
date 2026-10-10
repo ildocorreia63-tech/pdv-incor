@@ -1,3 +1,4 @@
+import { PlanGate } from "@/components/PlanGate";
 import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -86,19 +87,19 @@ const App = () => (
                 <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                 <Route path="/pdv" element={<ProtectedRoute><PDV /></ProtectedRoute>} />
                 <Route path="/pedidos" element={<ProtectedRoute><PedidosOnline /></ProtectedRoute>} />
-                <Route path="/cozinha" element={<ProtectedRoute><Cozinha /></ProtectedRoute>} />
+                <Route path="/cozinha" element={<ProtectedRoute><PlanGate feature="cozinha"><Cozinha /></PlanGate></ProtectedRoute>} />
                 <Route path="/fiado" element={<ProtectedRoute><Fiados /></ProtectedRoute>} />
                 <Route path="/despesas" element={<ProtectedRoute><Despesas /></ProtectedRoute>} />
                 <Route path="/relatorios" element={<ProtectedRoute><Relatorios /></ProtectedRoute>} />
                 <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
-                <Route path="/insumos" element={<ProtectedRoute adminOnly><Insumos /></ProtectedRoute>} />
-                <Route path="/lista-compras" element={<ProtectedRoute adminOnly><ListaCompras /></ProtectedRoute>} />
-                <Route path="/aniversariantes" element={<ProtectedRoute><Aniversariantes /></ProtectedRoute>} />
+                <Route path="/insumos" element={<ProtectedRoute adminOnly><PlanGate feature="insumos"><Insumos /></PlanGate></ProtectedRoute>} />
+                <Route path="/lista-compras" element={<ProtectedRoute adminOnly><PlanGate feature="insumos"><ListaCompras /></PlanGate></ProtectedRoute>} />
+                <Route path="/aniversariantes" element={<ProtectedRoute><PlanGate feature="aniversariantes"><Aniversariantes /></PlanGate></ProtectedRoute>} />
                 <Route path="/clientes" element={<ProtectedRoute><Clientes /></ProtectedRoute>} />
                 <Route path="/assinatura" element={<ProtectedRoute><Assinatura /></ProtectedRoute>} />
                 <Route path="/plataforma" element={<ProtectedRoute><Plataforma /></ProtectedRoute>} />
 
-                <Route path="/recuperacao" element={<ProtectedRoute><RecuperacaoLayout /></ProtectedRoute>}>
+                <Route path="/recuperacao" element={<ProtectedRoute><PlanGate feature="recuperacao"><RecuperacaoLayout /></PlanGate></ProtectedRoute>}>
                   <Route index element={<RecPainel />} />
                   <Route path="painel" element={<RecPainel />} />
                   <Route path="clientes" element={<RecClientes />} />
