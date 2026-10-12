@@ -60,7 +60,6 @@ export default function Equipe() {
   const remainingLabel = maxUsers === null ? "Ilimitado" : `${memberCount} de ${maxUsers}`;
   const activeOperators = useMemo(() => operators.filter((operator) => operator.active), [operators]);
   const operatorNames = useMemo(() => new Map(operators.map((operator) => [operator.id, operator.display_name])), [operators]);
-  const operatorNamesByUser = useMemo(() => new Map(operators.map((operator) => [operator.user_id, operator.display_name])), [operators]);
 
   const load = useCallback(async () => {
     if (!store?.id) return;
@@ -282,7 +281,7 @@ export default function Equipe() {
               </div>
               <fieldset className="space-y-2">
                 <legend className="text-sm font-medium">Operadores neste turno</legend>
-                {operators.map((operator) => (
+                {activeOperators.map((operator) => (
                   <label key={operator.id} className="flex cursor-pointer items-center gap-2 rounded-md border border-border p-2 text-sm">
                     <input type="checkbox" checked={selectedOperators.includes(operator.id)} onChange={() => toggleOperator(operator.id)} />
                     <span>{operator.display_name} <span className="text-muted-foreground">· {operator.email}</span></span>
