@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,12 +37,14 @@ type Movement = {
 };
 
 type SaleRow = { total: number; payment_method: string | null; created_at: string };
+type PaymentRow = { amount: number; method: string; sale_id: string | null; status: string; paid_at: string | null };
 
-async function fetchOpenSession(): Promise<Session | null> {
+async function fetchOpenSession(operatorId: string): Promise<Session | null> {
   const { data } = await supabase
     .from("cash_registers")
     .select("*")
     .eq("status", "open")
+    .eq("opened_by", operatorId)
     .maybeSingle();
   return (data as any) ?? null;
 }
@@ -55,11 +58,25 @@ async function fetchMovements(sessionId: string): Promise<Movement[]> {
   return ((data ?? []) as any[]).map((m) => ({ ...m, amount: Number(m.amount) }));
 }
 
-async function fetchSalesSince(iso: string, untilIso?: string): Promise<SaleRow[]> {
-  let q = supabase.from("sales").select("total, payment_method, created_at").gte("created_at", iso);
-  if (untilIso) q = q.lte("created_at", untilIso);
-  const { data } = await q;
-  return ((data ?? []) as any[]).map((s) => ({ ...s, total: Number(s.total) }));
+async function fetchSalesSince(iso: string, operatorId: string, untilIso?: string): Promise<SaleRow[]> {
+  let query = supabase.from("sales").select("id,created_at").eq("operator_id", operatorId).gte("created_at", iso);
+  if (untilIso) query = query.lte("created_at", untilIso);
+  const { data: sales } = await query;
+  const ids = (sales ?? []).map((sale) => sale.id);
+  if (ids.length === 0) return [];
+  const { data: payments } = await supabase
+    .from("payments")
+    .select("amount,method,sale_id,status,paid_at")
+    .in("sale_id", ids)
+    .eq("status", "paid");
+  const saleTimes = new Map((sales ?? []).map((sale) => [sale.id, sale.created_at]));
+  return ((payments ?? []) as PaymentRow[])
+    .filter((payment) => !!payment.sale_id && saleTimes.has(payment.sale_id))
+    .map((payment) => ({
+      total: Number(payment.amount),
+      payment_method: payment.method,
+      created_at: saleTimes.get(payment.sale_id!)!,
+    }));
 }
 
 function paymentBreakdown(sales: SaleRow[]) {
@@ -95,6 +112,7 @@ const paymentLabel: Record<string, string> = {
 };
 
 export function CashRegisterDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const { user } = useAuth();
   const [session, setSession] = useState<Session | null>(null);
   const [movements, setMovements] = useState<Movement[]>([]);
   const [sales, setSales] = useState<SaleRow[]>([]);
@@ -116,10 +134,11 @@ export function CashRegisterDialog({ open, onOpenChange }: { open: boolean; onOp
 
   const load = async () => {
     setLoading(true);
-    const s = await fetchOpenSession();
+    if (!user?.id) { setSession(null); setLoading(false); return; }
+    const s = await fetchOpenSession(user.id);
     setSession(s);
     if (s) {
-      const [mv, sl] = await Promise.all([fetchMovements(s.id), fetchSalesSince(s.opened_at)]);
+      const [mv, sl] = await Promise.all([fetchMovements(s.id), fetchSalesSince(s.opened_at, s.opened_by, s.closed_at ?? undefined)]);
       setMovements(mv);
       setSales(sl);
     } else {
@@ -129,7 +148,7 @@ export function CashRegisterDialog({ open, onOpenChange }: { open: boolean; onOp
     setLoading(false);
   };
 
-  useEffect(() => { if (open) load(); }, [open]);
+  useEffect(() => { if (open) void load(); }, [open, user?.id]);
 
   const totals = useMemo(() => {
     const cashSales = sales.filter((s) => (s.payment_method || "").toLowerCase() === "cash")
@@ -203,7 +222,7 @@ export function CashRegisterDialog({ open, onOpenChange }: { open: boolean; onOp
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <DollarSign className="h-5 w-5" />
-            Controle de Caixa
+            Caixa de {user?.user_metadata?.display_name || user?.email || "operador"}
             {session ? (
               <Badge className="bg-emerald-500 text-white">Aberto</Badge>
             ) : (
@@ -361,6 +380,7 @@ function closingHtml(session: Session, t: Totals, counted: number, diff: number,
   return `
     <h1>FECHAMENTO DE CAIXA</h1>
     <hr/>
+    <div>Operador: ${session.opened_by}</div>
     <div>Abertura: ${new Date(session.opened_at).toLocaleString("pt-BR")}</div>
     <div>Fechamento: ${new Date().toLocaleString("pt-BR")}</div>
     <hr/>
