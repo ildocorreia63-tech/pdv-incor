@@ -4,6 +4,7 @@ export interface PlanDef {
   name: string;
   monthly: number;
   highlight?: boolean;
+  maxUsers: number | null;
   features: string[];
 }
 
@@ -14,6 +15,7 @@ export const PLANS: PlanDef[] = [
     id: "essencial",
     name: "Essencial",
     monthly: 49,
+    maxUsers: 1,
     features: ["PDV e caixa", "Produtos e categorias", "Clientes e fiado", "Relatórios básicos", "1 usuário"],
   },
   {
@@ -21,15 +23,21 @@ export const PLANS: PlanDef[] = [
     name: "Pro",
     monthly: 99,
     highlight: true,
+    maxUsers: 3,
     features: ["Tudo do Essencial", "Cardápio online com link próprio", "Entrega por km ou bairro", "Pix e tela da cozinha", "Aniversariantes", "3 usuários"],
   },
   {
     id: "premium",
     name: "Premium",
     monthly: 179,
+    maxUsers: null,
     features: ["Tudo do Pro", "Recuperação de clientes", "iFood e webhooks", "Insumos e lista de compras", "Usuários ilimitados"],
   },
 ];
+
+/** Limite total de contas da loja; inclui o proprietário. */
+export const maxUsersForPlan = (plan: string): number | null =>
+  plan === "trial" ? null : PLANS.find((item) => item.id === plan)?.maxUsers ?? 1;
 
 /** Anual = 10x o mensal (2 meses grátis). */
 export const annualPrice = (monthly: number): number => monthly * 10;
