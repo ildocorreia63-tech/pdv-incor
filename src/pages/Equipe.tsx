@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { maxUsersForPlan } from "@/lib/plans";
 import { formatBRL } from "@/lib/format";
 import { toast } from "sonner";
-import { CalendarClock, KeyRound, Loader2, Plus, ShieldCheck, UserRoundX, UsersRound, WalletCards } from "lucide-react";
+import { CalendarClock, KeyRound, Loader2, Plus, ShieldCheck, Trash2, UserRoundX, UsersRound, WalletCards } from "lucide-react";
 
 type Operator = { id: string; user_id: string; display_name: string; email: string; created_at: string; active: boolean };
 type Shift = { id: string; name: string; day_of_week: number; starts_at: string; ends_at: string; active: boolean };
