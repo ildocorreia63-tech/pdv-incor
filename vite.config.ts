@@ -2,9 +2,9 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
-// https://vitejs.dev/config/
+// GitHub Pages serves this repository under /pdv-incor/; Vercel serves from /.
 export default defineConfig(() => ({
-  base: "/pdv-incor/",
+  base: process.env.GITHUB_PAGES === "true" ? "/pdv-incor/" : "/",
   server: {
     host: "::",
     port: 8080,
