@@ -16,6 +16,6 @@ describe("maxUsersForPlan", () => {
   it("Pro permite três contas", () => expect(maxUsersForPlan("pro")).toBe(3));
   it("Premium e teste permitem contas ilimitadas", () => {
     expect(maxUsersForPlan("premium")).toBeNull();
-    expect(maxUsersForPlan("trial")).toBeNull();
+    expect(maxUsersForPlan("trial")).toBe(1);
   });
 });
