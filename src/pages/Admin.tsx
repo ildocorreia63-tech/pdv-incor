@@ -507,6 +507,11 @@ export default function Admin() {
       title="Painel Admin"
       subAction={
         <>
+          <Link to="/equipe">
+            <TooltipIconButton label="Equipe">
+              <UsersRound className="h-5 w-5" />
+            </TooltipIconButton>
+          </Link>
           <Link to="/relatorios">
             <TooltipIconButton label="Relatórios">
               <ChartNoAxesCombined className="h-5 w-5" />
