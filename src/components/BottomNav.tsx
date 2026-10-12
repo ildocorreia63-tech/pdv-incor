@@ -16,7 +16,7 @@ const tabs = [
 ];
 
 export const BottomNav = () => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, store } = useAuth();
   const loc = useLocation();
   const [pendingCount, setPendingCount] = useState(0);
 
@@ -37,6 +37,7 @@ export const BottomNav = () => {
   }, []);
 
   const items = [...tabs];
+  if (store?.memberRole === "owner") items.push({ to: "/equipe", icon: Users, label: "Equipe" } as any);
   if (isAdmin) items.push({ to: "/admin", icon: Package, label: "Admin" } as any);
 
   return (
