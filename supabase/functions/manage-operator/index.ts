@@ -59,18 +59,18 @@ Deno.serve(async (req: Request) => {
       return response({ success: true });
     }
 
-    const { error: deactivateError } = await admin.from("store_operators")
-      .update({ active: false }).eq("store_id", storeId).eq("id", operatorId);
-    if (deactivateError) return response({ error: "Não foi possível remover o operador" }, 400);
+    // Revoke store access first; later failures must never leave a removed operator authorized.
+    const { error: membershipDeleteError } = await admin.from("store_members")
+      .delete().eq("store_id", storeId).eq("user_id", operator.user_id).eq("role", "operator");
+    if (membershipDeleteError) return response({ error: "Não foi possível revogar o acesso do operador" }, 400);
 
     const { error: assignmentsError } = await admin.from("store_shift_assignments")
       .delete().eq("store_id", storeId).eq("operator_id", operatorId);
-    if (assignmentsError) return response({ error: "Operador inativado; não foi possível atualizar a escala" }, 400);
+    if (assignmentsError) return response({ error: "Acesso revogado; não foi possível atualizar a escala" }, 400);
 
-    const { error: membershipDeleteError } = await admin.from("store_members")
-      .delete().eq("store_id", storeId).eq("user_id", operator.user_id).eq("role", "operator");
-    if (membershipDeleteError) return response({ error: "Operador inativado; não foi possível revogar o acesso" }, 400);
-
+    const { error: deactivateError } = await admin.from("store_operators")
+      .update({ active: false }).eq("store_id", storeId).eq("id", operatorId);
+    if (deactivateError) return response({ error: "Acesso revogado; não foi possível concluir a remoção" }, 400);
     return response({ success: true });
   } catch (error) {
     console.error("[manage-operator]", error);
