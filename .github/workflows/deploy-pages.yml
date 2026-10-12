@@ -16,6 +16,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      VITE_SUPABASE_URL: "https://kuclsqujxdljazsxvxkn.supabase.co"
+      VITE_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_VXGs7SRXOXGw2iJb__JO1A_Tabxr8ci"
     permissions:
       contents: read
       pages: read
