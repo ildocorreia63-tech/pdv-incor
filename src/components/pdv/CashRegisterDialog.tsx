@@ -211,7 +211,7 @@ export function CashRegisterDialog({ open, onOpenChange }: { open: boolean; onOp
     setClosing(false);
     if (error) return toast.error("Erro ao fechar: " + error.message);
     toast.success("Caixa fechado");
-    printReport(closingHtml(session, totals, closingAmount, diff, closingNotes, movements));
+    printReport(closingHtml(session, totals, closingAmount, diff, closingNotes, movements, user?.user_metadata?.display_name || user?.email || session.opened_by));
     setClosingAmount(0); setClosingNotes("");
     await load();
   };
@@ -325,7 +325,7 @@ export function CashRegisterDialog({ open, onOpenChange }: { open: boolean; onOp
                 <Textarea rows={2} value={closingNotes} onChange={(e) => setClosingNotes(e.target.value)} />
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => printReport(closingHtml(session, totals, closingAmount || totals.expected, (closingAmount || totals.expected) - totals.expected, closingNotes, movements))}>
+                <Button variant="outline" className="flex-1" onClick={() => printReport(closingHtml(session, totals, closingAmount || totals.expected, (closingAmount || totals.expected) - totals.expected, closingNotes, movements, user?.user_metadata?.display_name || user?.email || session.opened_by))}>
                   <Printer className="h-4 w-4 mr-1" /> Imprimir prévia
                 </Button>
                 <Button variant="destructive" className="flex-1" onClick={closeRegister} disabled={closing}>
@@ -373,14 +373,14 @@ function openingHtml(amount: number, notes: string, email: string) {
 }
 
 type Totals = { opening: number; cashSales: number; reforco: number; sangria: number; expected: number; salesTotal: number; byPayment: Record<string, number> };
-function closingHtml(session: Session, t: Totals, counted: number, diff: number, notes: string, movs: Movement[]) {
+function closingHtml(session: Session, t: Totals, counted: number, diff: number, notes: string, movs: Movement[], operatorName: string) {
   const pay = Object.entries(t.byPayment)
     .map(([k, v]) => `<tr><td>${paymentLabel[k] || k}</td><td class="r">${formatBRL(v)}</td></tr>`).join("");
   const movRows = movs.map((m) => `<tr><td>${m.type === "sangria" ? "− Sangria" : "+ Reforço"}${m.reason ? " · " + m.reason : ""}</td><td class="r">${formatBRL(m.amount)}</td></tr>`).join("");
   return `
     <h1>FECHAMENTO DE CAIXA</h1>
     <hr/>
-    <div>Operador: ${session.opened_by}</div>
+    <div>Operador: ${operatorName}</div>
     <div>Abertura: ${new Date(session.opened_at).toLocaleString("pt-BR")}</div>
     <div>Fechamento: ${new Date().toLocaleString("pt-BR")}</div>
     <hr/>
