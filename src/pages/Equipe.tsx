@@ -66,7 +66,7 @@ export default function Equipe() {
     if (!store?.id) return;
     setLoading(true);
     const [operatorsResult, shiftsResult, assignmentsResult, membersResult, cashResult] = await Promise.all([
-      supabase.from("store_operators" as any).select("id,user_id,display_name,email,created_at").eq("store_id", store.id).order("created_at", { ascending: false }),
+      supabase.from("store_operators" as any).select("id,user_id,display_name,email,created_at,active").eq("store_id", store.id).order("created_at", { ascending: false }),
       supabase.from("store_shifts" as any).select("id,name,day_of_week,starts_at,ends_at,active").eq("store_id", store.id).order("day_of_week").order("starts_at"),
       supabase.from("store_shift_assignments" as any).select("id,shift_id,operator_id").eq("store_id", store.id),
       supabase.from("store_members").select("id", { count: "exact", head: true }).eq("store_id", store.id),
@@ -243,7 +243,13 @@ export default function Equipe() {
                       <p className="truncate font-medium">{operator.display_name}</p>
                       <p className="truncate text-sm text-muted-foreground">{operator.email}</p>
                     </div>
-                    <Badge variant="secondary">Operador</Badge>
+                    <div className="flex shrink-0 items-center gap-1">
+  {operator.active ? <>
+    <Button type="button" size="icon" variant="ghost" aria-label={"Redefinir senha de " + operator.display_name} disabled={operatorAction !== null} onClick={() => void manageOperator(operator.id, "reset_password")}><KeyRound className="h-4 w-4" /></Button>
+    <Button type="button" size="icon" variant="ghost" aria-label={"Remover " + operator.display_name} disabled={operatorAction !== null} onClick={() => void manageOperator(operator.id, "remove")}><UserRoundX className="h-4 w-4 text-destructive" /></Button>
+    <Badge variant="secondary">Ativo</Badge>
+  </> : <Badge variant="outline">Removido</Badge>}
+</div>
                   </li>
                 ))}
               </ul>
@@ -304,7 +310,10 @@ export default function Equipe() {
                     <li key={shift.id} className="rounded-md border border-border p-3">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <p className="font-medium">{shift.name} <span className="text-sm font-normal text-muted-foreground">· {DAYS[shift.day_of_week]}</span></p>
-                        <Badge variant="outline">{shift.starts_at.slice(0, 5)}–{shift.ends_at.slice(0, 5)}</Badge>
+                        <div className="flex items-center gap-1">
+  <Badge variant="outline">{shift.starts_at.slice(0, 5)}–{shift.ends_at.slice(0, 5)}</Badge>
+  <Button type="button" size="icon" variant="ghost" aria-label={"Excluir turno " + shift.name} onClick={() => void deleteShift(shift.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+</div>
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">{assigned.join(", ") || "Nenhum operador vinculado"}</p>
                     </li>
@@ -313,6 +322,39 @@ export default function Equipe() {
               </ul>
             )}
           </div>
+        </Card>
+        <Card className="p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <WalletCards className="h-5 w-5 text-primary" />
+            <div><h2 className="font-semibold">Caixa por operador</h2><p className="text-xs text-muted-foreground">Histórico individual das últimas 100 aberturas e fechamentos.</p></div>
+          </div>
+          {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : operators.length === 0 ? <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">Nenhum operador cadastrado.</p> : (
+            <div className="space-y-2">
+              {operators.map((operator) => {
+                const sessions = cashSessions.filter((session) => session.opened_by === operator.user_id);
+                const expected = sessions.reduce((sum, session) => sum + Number(session.expected_amount ?? 0), 0);
+                const difference = sessions.reduce((sum, session) => sum + Number(session.difference ?? 0), 0);
+                return <details key={operator.id} className="rounded-md border border-border p-3">
+                  <summary className="cursor-pointer list-none">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="font-medium">{operator.display_name} <span className="text-xs text-muted-foreground">· {sessions.length} caixa(s)</span></span>
+                      <span className="text-sm">Esperado: {formatBRL(expected)} · Diferenças: {formatBRL(difference)}</span>
+                    </div>
+                  </summary>
+                  <div className="mt-3 space-y-2 border-t border-border pt-3">
+                    {sessions.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum caixa aberto por este operador.</p> : sessions.map((session) => (
+                      <div key={session.id} className="grid gap-1 rounded bg-muted/50 p-2 text-sm sm:grid-cols-2">
+                        <span>{new Date(session.opened_at).toLocaleString("pt-BR")} · {session.status === "open" ? "Aberto" : "Fechado"}</span>
+                        <span className="sm:text-right">Fundo {formatBRL(Number(session.opening_amount))} · Fechamento {session.closing_amount == null ? "—" : formatBRL(Number(session.closing_amount))}</span>
+                        <span className="text-muted-foreground">Esperado: {session.expected_amount == null ? "em aberto" : formatBRL(Number(session.expected_amount))}</span>
+                        <span className="text-muted-foreground sm:text-right">Diferença: {session.difference == null ? "—" : formatBRL(Number(session.difference))}</span>
+                      </div>
+                    ))}
+                  </div>
+                </details>;
+              })}
+            </div>
+          )}
         </Card>
       </div>
     </AppShell>
