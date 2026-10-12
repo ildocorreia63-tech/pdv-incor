@@ -9,12 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { maxUsersForPlan } from "@/lib/plans";
+import { formatBRL } from "@/lib/format";
 import { toast } from "sonner";
-import { CalendarClock, Loader2, Plus, ShieldCheck, UsersRound } from "lucide-react";
+import { CalendarClock, KeyRound, Loader2, Plus, ShieldCheck, UserRoundX, UsersRound, WalletCards } from "lucide-react";
 
-type Operator = { id: string; user_id: string; display_name: string; email: string; created_at: string };
+type Operator = { id: string; user_id: string; display_name: string; email: string; created_at: string; active: boolean };
 type Shift = { id: string; name: string; day_of_week: number; starts_at: string; ends_at: string; active: boolean };
 type Assignment = { id: string; shift_id: string; operator_id: string };
+type CashSession = { id: string; opened_by: string; opened_at: string; opening_amount: number; closed_at: string | null; closing_amount: number | null; expected_amount: number | null; difference: number | null; status: "open" | "closed" };
 type CreateOperatorResponse = { operator?: Operator; error?: string };
 
 const DAYS = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
@@ -35,10 +37,12 @@ export default function Equipe() {
   const [operators, setOperators] = useState<Operator[]>([]);
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [cashSessions, setCashSessions] = useState<CashSession[]>([]);
   const [memberCount, setMemberCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [savingOperator, setSavingOperator] = useState(false);
   const [savingShift, setSavingShift] = useState(false);
+  const [operatorAction, setOperatorAction] = useState<string | null>(null);
   const [operatorName, setOperatorName] = useState("");
   const [operatorEmail, setOperatorEmail] = useState("");
   const [operatorPassword, setOperatorPassword] = useState("");
@@ -54,18 +58,21 @@ export default function Equipe() {
   const canAddByPlan = trialActive || store?.subscription_status === "active";
   const reachedLimit = maxUsers !== null && memberCount >= maxUsers;
   const remainingLabel = maxUsers === null ? "Ilimitado" : `${memberCount} de ${maxUsers}`;
+  const activeOperators = useMemo(() => operators.filter((operator) => operator.active), [operators]);
   const operatorNames = useMemo(() => new Map(operators.map((operator) => [operator.id, operator.display_name])), [operators]);
+  const operatorNamesByUser = useMemo(() => new Map(operators.map((operator) => [operator.user_id, operator.display_name])), [operators]);
 
   const load = useCallback(async () => {
     if (!store?.id) return;
     setLoading(true);
-    const [operatorsResult, shiftsResult, assignmentsResult, membersResult] = await Promise.all([
+    const [operatorsResult, shiftsResult, assignmentsResult, membersResult, cashResult] = await Promise.all([
       supabase.from("store_operators" as any).select("id,user_id,display_name,email,created_at").eq("store_id", store.id).order("created_at", { ascending: false }),
       supabase.from("store_shifts" as any).select("id,name,day_of_week,starts_at,ends_at,active").eq("store_id", store.id).order("day_of_week").order("starts_at"),
       supabase.from("store_shift_assignments" as any).select("id,shift_id,operator_id").eq("store_id", store.id),
       supabase.from("store_members").select("id", { count: "exact", head: true }).eq("store_id", store.id),
+      supabase.from("cash_registers").select("id,opened_by,opened_at,opening_amount,closed_at,closing_amount,expected_amount,difference,status").eq("store_id", store.id).order("opened_at", { ascending: false }).limit(100),
     ]);
-    const queryError = operatorsResult.error ?? shiftsResult.error ?? assignmentsResult.error ?? membersResult.error;
+    const queryError = operatorsResult.error ?? shiftsResult.error ?? assignmentsResult.error ?? membersResult.error ?? cashResult.error;
     if (queryError) {
       toast.error("Não foi possível carregar a equipe. Confira se a atualização do banco foi aplicada.");
     } else {
@@ -73,6 +80,7 @@ export default function Equipe() {
       setShifts((shiftsResult.data ?? []) as Shift[]);
       setAssignments((assignmentsResult.data ?? []) as Assignment[]);
       setMemberCount(membersResult.count ?? 0);
+      setCashSessions((cashResult.data ?? []) as CashSession[]);
     }
     setLoading(false);
   }, [store?.id]);
@@ -147,6 +155,30 @@ export default function Equipe() {
     }
   };
 
+  const manageOperator = async (operatorId: string, action: "remove" | "reset_password") => {
+    if (!store?.id) return;
+    const password = action === "reset_password" ? window.prompt("Nova senha (mínimo de 8 caracteres):") : null;
+    if (action === "reset_password" && password === null) return;
+    if (action === "remove" && !window.confirm("Remover este operador? O acesso à loja será revogado e ele sairá da escala.")) return;
+    setOperatorAction(operatorId);
+    try {
+      const result = await supabase.functions.invoke<{ success?: boolean; error?: string }>("manage-operator", { body: { storeId: store.id, operatorId, action, ...(password !== null ? { password } : {}) } });
+      if (result.error) throw new Error(await errorMessage(result.error));
+      if (!result.data?.success) throw new Error(result.data?.error ?? "Não foi possível concluir a ação.");
+      toast.success(action === "remove" ? "Acesso do operador removido." : "Senha redefinida.");
+      await load();
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Erro ao gerenciar operador."); }
+    finally { setOperatorAction(null); }
+  };
+
+  const deleteShift = async (shiftId: string) => {
+    if (!store?.id || !window.confirm("Excluir este turno da escala?")) return;
+    const { error } = await supabase.from("store_shifts" as any).delete().eq("id", shiftId).eq("store_id", store.id);
+    if (error) return toast.error("Não foi possível excluir o turno: " + error.message);
+    toast.success("Turno removido da escala.");
+    await load();
+  };
+
   const toggleOperator = (operatorId: string) => {
     setSelectedOperators((current) => current.includes(operatorId)
       ? current.filter((id) => id !== operatorId)
@@ -154,7 +186,7 @@ export default function Equipe() {
   };
 
   return (
-    <AppShell title="Equipe e turnos">
+    <AppShell title="Equipe">
       <div className="space-y-4">
         <Card className="p-4">
           <div className="flex items-start gap-3">
@@ -175,7 +207,7 @@ export default function Equipe() {
         <Card className="p-4">
           <div className="mb-3 flex items-center gap-2">
             <UsersRound className="h-5 w-5 text-primary" />
-            <h2 className="font-semibold">Cadastrar operador</h2>
+            <h2 className="font-semibold">Operadores</h2>
           </div>
           <form onSubmit={createOperator} className="space-y-3">
             <div>
@@ -205,7 +237,7 @@ export default function Equipe() {
               <p className="text-sm text-muted-foreground">Nenhum operador cadastrado ainda.</p>
             ) : (
               <ul className="space-y-2">
-                {operators.map((operator) => (
+                {activeOperators.map((operator) => (
                   <li key={operator.id} className="flex items-center justify-between gap-3 rounded-md border border-border p-3">
                     <div className="min-w-0">
                       <p className="truncate font-medium">{operator.display_name}</p>
@@ -222,9 +254,9 @@ export default function Equipe() {
         <Card className="p-4">
           <div className="mb-3 flex items-center gap-2">
             <CalendarClock className="h-5 w-5 text-primary" />
-            <h2 className="font-semibold">Escala de turnos</h2>
+            <h2 className="font-semibold">Escala</h2>
           </div>
-          {operators.length === 0 ? (
+          {activeOperators.length === 0 ? (
             <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">Cadastre um operador antes de montar a escala.</p>
           ) : (
             <form onSubmit={createShift} className="space-y-3">
