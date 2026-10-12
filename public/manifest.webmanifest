@@ -2,8 +2,8 @@
   "name": "1980 Burguer PDV",
   "short_name": "1980 PDV",
   "description": "Sistema PDV completo da 1980 Burguer: controle de vendas, fiado, despesas, delivery, cardápio digital e pagamentos Pix e cartão.",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "/pdv-incor/",
+  "scope": "/pdv-incor/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f1e7d3",
@@ -11,19 +11,19 @@
   "lang": "pt-BR",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "/pdv-incor/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/pdv-incor/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/pdv-incor/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
