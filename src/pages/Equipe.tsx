@@ -1,4 +1,5 @@
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { FormEvent } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
