@@ -2,7 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
-export const ProtectedRoute = ({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) => {
+export const ProtectedRoute = ({ children, adminOnly = false, ownerOnly = false }: { children: React.ReactNode; adminOnly?: boolean; ownerOnly?: boolean }) => {
   const { user, isAdmin, loading, store } = useAuth();
   if (loading || (user && store === undefined))
     return (
@@ -14,5 +14,6 @@ export const ProtectedRoute = ({ children, adminOnly = false }: { children: Reac
   // Usuário logado sem loja: precisa criar a própria hamburgueria primeiro
   if (!store) return <Navigate to="/criar-loja" replace />;
   if (adminOnly && !isAdmin) return <Navigate to="/" replace />;
+  if (ownerOnly && store.memberRole !== "owner") return <Navigate to="/" replace />;
   return <>{children}</>;
 };
