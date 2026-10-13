@@ -1,0 +1,107 @@
+ALTER TABLE public."cash_movements" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."cash_registers" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."categories" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."customers" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."delivery_zones" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."expenses" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."ingredient_movements" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."ingredients" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."online_order_items" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."online_orders" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."payments" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."platform_admins" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."product_recipes" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."products" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."profiles" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."sale_items" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."sales" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."store_members" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."store_settings" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."stores" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."user_roles" ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Admins can delete cash_movements" ON public."cash_movements" AS permissive FOR DELETE TO "authenticated" USING (is_admin(auth.uid()));
+CREATE POLICY "Authenticated can insert cash_movements" ON public."cash_movements" AS permissive FOR INSERT TO "authenticated" WITH CHECK ((auth.uid() = created_by));
+CREATE POLICY "Staff can view cash_movements" ON public."cash_movements" AS permissive FOR SELECT TO "authenticated" USING ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Store isolation" ON public."cash_movements" AS restrictive FOR ALL TO "authenticated" USING (is_store_member(store_id)) WITH CHECK (is_store_member(store_id));
+CREATE POLICY "Admins can delete cash_registers" ON public."cash_registers" AS permissive FOR DELETE TO "authenticated" USING (is_admin(auth.uid()));
+CREATE POLICY "Authenticated can insert cash_registers" ON public."cash_registers" AS permissive FOR INSERT TO "authenticated" WITH CHECK ((auth.uid() = opened_by));
+CREATE POLICY "Staff can update cash_registers" ON public."cash_registers" AS permissive FOR UPDATE TO "authenticated" USING ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role))) WITH CHECK ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Staff can view cash_registers" ON public."cash_registers" AS permissive FOR SELECT TO "authenticated" USING ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Store isolation" ON public."cash_registers" AS restrictive FOR ALL TO "authenticated" USING (is_store_member(store_id)) WITH CHECK (is_store_member(store_id));
+CREATE POLICY "Admins manage categories" ON public."categories" AS permissive FOR ALL TO "authenticated" USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
+CREATE POLICY "Anon default store only" ON public."categories" AS restrictive FOR SELECT TO "anon" USING ((store_id = current_store_id()));
+CREATE POLICY "Categories public read" ON public."categories" AS permissive FOR SELECT TO PUBLIC USING (true);
+CREATE POLICY "Store isolation" ON public."categories" AS restrictive FOR ALL TO "authenticated" USING (is_store_member(store_id)) WITH CHECK (is_store_member(store_id));
+CREATE POLICY "Admins delete customers" ON public."customers" AS permissive FOR DELETE TO "authenticated" USING (is_admin(auth.uid()));
+CREATE POLICY "Staff insert customers" ON public."customers" AS permissive FOR INSERT TO "authenticated" WITH CHECK ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Staff read customers" ON public."customers" AS permissive FOR SELECT TO "authenticated" USING ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Staff update customers" ON public."customers" AS permissive FOR UPDATE TO "authenticated" USING ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Store isolation" ON public."customers" AS restrictive FOR ALL TO "authenticated" USING (is_store_member(store_id)) WITH CHECK (is_store_member(store_id));
+CREATE POLICY "Admins manage delivery zones" ON public."delivery_zones" AS permissive FOR ALL TO "authenticated" USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
+CREATE POLICY "Anon default store only" ON public."delivery_zones" AS restrictive FOR SELECT TO "anon" USING ((store_id = current_store_id()));
+CREATE POLICY "Delivery zones public read" ON public."delivery_zones" AS permissive FOR SELECT TO PUBLIC USING (true);
+CREATE POLICY "Store isolation" ON public."delivery_zones" AS restrictive FOR ALL TO "authenticated" USING (is_store_member(store_id)) WITH CHECK (is_store_member(store_id));
+CREATE POLICY "Admins delete expenses" ON public."expenses" AS permissive FOR DELETE TO "authenticated" USING (is_admin(auth.uid()));
+CREATE POLICY "Insert expenses" ON public."expenses" AS permissive FOR INSERT TO PUBLIC WITH CHECK (((auth.uid() = created_by) AND (is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role))));
+CREATE POLICY "Staff read expenses" ON public."expenses" AS permissive FOR SELECT TO "authenticated" USING ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Store isolation" ON public."expenses" AS restrictive FOR ALL TO "authenticated" USING (is_store_member(store_id)) WITH CHECK (is_store_member(store_id));
+CREATE POLICY "Update expenses" ON public."expenses" AS permissive FOR UPDATE TO "authenticated" USING (((auth.uid() = created_by) OR is_admin(auth.uid())));
+CREATE POLICY "Admins delete movements" ON public."ingredient_movements" AS permissive FOR DELETE TO "authenticated" USING (is_admin(auth.uid()));
+CREATE POLICY "Admins insert movements" ON public."ingredient_movements" AS permissive FOR INSERT TO "authenticated" WITH CHECK (is_admin(auth.uid()));
+CREATE POLICY "Admins update movements" ON public."ingredient_movements" AS permissive FOR UPDATE TO "authenticated" USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
+CREATE POLICY "Staff read movements" ON public."ingredient_movements" AS permissive FOR SELECT TO "authenticated" USING ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Store isolation" ON public."ingredient_movements" AS restrictive FOR ALL TO "authenticated" USING (is_store_member(store_id)) WITH CHECK (is_store_member(store_id));
+CREATE POLICY "Admins manage ingredients" ON public."ingredients" AS permissive FOR ALL TO "authenticated" USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
+CREATE POLICY "Staff read ingredients" ON public."ingredients" AS permissive FOR SELECT TO "authenticated" USING ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Store isolation" ON public."ingredients" AS restrictive FOR ALL TO "authenticated" USING (is_store_member(store_id)) WITH CHECK (is_store_member(store_id));
+CREATE POLICY "Admins delete online order items" ON public."online_order_items" AS permissive FOR DELETE TO "authenticated" USING (is_admin(auth.uid()));
+CREATE POLICY "Staff read online order items" ON public."online_order_items" AS permissive FOR SELECT TO "authenticated" USING ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Store isolation" ON public."online_order_items" AS restrictive FOR ALL TO "authenticated" USING (is_store_member(store_id)) WITH CHECK (is_store_member(store_id));
+CREATE POLICY "Admins delete online orders" ON public."online_orders" AS permissive FOR DELETE TO "authenticated" USING (is_admin(auth.uid()));
+CREATE POLICY "Public create online orders validated" ON public."online_orders" AS permissive FOR INSERT TO "anon", "authenticated" WITH CHECK (((status = ANY (ARRAY['pending'::online_order_status, 'pending_payment'::online_order_status])) AND (accepted_by IS NULL) AND (accepted_at IS NULL) AND (sale_id IS NULL) AND (payment_confirmed_at IS NULL) AND (asaas_payment_id IS NULL) AND (asaas_invoice_url IS NULL) AND ((payment_method IS NULL) OR (payment_method = ANY (ARRAY['cash'::text, 'pix'::text, 'card_delivery'::text]))) AND ((length(customer_name) >= 1) AND (length(customer_name) <= 120)) AND ((length(customer_phone) >= 1) AND (length(customer_phone) <= 30)) AND (subtotal >= (0)::numeric) AND (total >= (0)::numeric) AND (delivery_fee >= (0)::numeric) AND ((order_type = 'pickup'::online_order_type) OR ((order_type = 'delivery'::online_order_type) AND (delivery_zone_id IS NOT NULL) AND (EXISTS ( SELECT 1
+   FROM delivery_zones dz
+  WHERE ((dz.id = online_orders.delivery_zone_id) AND (dz.active = true) AND (dz.fee = online_orders.delivery_fee))))))));
+CREATE POLICY "Staff read online orders" ON public."online_orders" AS permissive FOR SELECT TO "authenticated" USING ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Staff update online orders" ON public."online_orders" AS permissive FOR UPDATE TO "authenticated" USING ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role))) WITH CHECK ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Store isolation" ON public."online_orders" AS restrictive FOR ALL TO "authenticated" USING (is_store_member(store_id)) WITH CHECK (is_store_member(store_id));
+CREATE POLICY "Admins delete payments" ON public."payments" AS permissive FOR DELETE TO "authenticated" USING (is_admin(auth.uid()));
+CREATE POLICY "Insert payments" ON public."payments" AS permissive FOR INSERT TO PUBLIC WITH CHECK (((auth.uid() = created_by) AND (is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role))));
+CREATE POLICY "Staff read payments" ON public."payments" AS permissive FOR SELECT TO "authenticated" USING ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Store isolation" ON public."payments" AS restrictive FOR ALL TO "authenticated" USING (is_store_member(store_id)) WITH CHECK (is_store_member(store_id));
+CREATE POLICY "Update payments" ON public."payments" AS permissive FOR UPDATE TO "authenticated" USING (((auth.uid() = created_by) OR is_admin(auth.uid())));
+CREATE POLICY "own row" ON public."platform_admins" AS permissive FOR SELECT TO "authenticated" USING ((user_id = auth.uid()));
+CREATE POLICY "Admins manage recipes" ON public."product_recipes" AS permissive FOR ALL TO "authenticated" USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
+CREATE POLICY "Staff read recipes" ON public."product_recipes" AS permissive FOR SELECT TO "authenticated" USING ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Store isolation" ON public."product_recipes" AS restrictive FOR ALL TO "authenticated" USING (is_store_member(store_id)) WITH CHECK (is_store_member(store_id));
+CREATE POLICY "Admins manage products" ON public."products" AS permissive FOR ALL TO "authenticated" USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
+CREATE POLICY "Anon default store only" ON public."products" AS restrictive FOR SELECT TO "anon" USING ((store_id = current_store_id()));
+CREATE POLICY "Products public read" ON public."products" AS permissive FOR SELECT TO PUBLIC USING ((active = true));
+CREATE POLICY "Staff read all products" ON public."products" AS permissive FOR SELECT TO "authenticated" USING ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Store isolation" ON public."products" AS restrictive FOR ALL TO "authenticated" USING (is_store_member(store_id)) WITH CHECK (is_store_member(store_id));
+CREATE POLICY "Staff or self read profiles" ON public."profiles" AS permissive FOR SELECT TO "authenticated" USING (((auth.uid() = user_id) OR is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Users insert own profile" ON public."profiles" AS permissive FOR INSERT TO "authenticated" WITH CHECK ((auth.uid() = user_id));
+CREATE POLICY "Users update own profile" ON public."profiles" AS permissive FOR UPDATE TO "authenticated" USING ((auth.uid() = user_id));
+CREATE POLICY "Delete sale items" ON public."sale_items" AS permissive FOR DELETE TO "authenticated" USING ((EXISTS ( SELECT 1
+   FROM sales s
+  WHERE ((s.id = sale_items.sale_id) AND ((s.operator_id = auth.uid()) OR is_admin(auth.uid()))))));
+CREATE POLICY "Insert sale items" ON public."sale_items" AS permissive FOR INSERT TO "authenticated" WITH CHECK ((EXISTS ( SELECT 1
+   FROM sales s
+  WHERE ((s.id = sale_items.sale_id) AND ((s.operator_id = auth.uid()) OR is_admin(auth.uid()))))));
+CREATE POLICY "Staff read sale items" ON public."sale_items" AS permissive FOR SELECT TO "authenticated" USING ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Store isolation" ON public."sale_items" AS restrictive FOR ALL TO "authenticated" USING (is_store_member(store_id)) WITH CHECK (is_store_member(store_id));
+CREATE POLICY "Update sale items" ON public."sale_items" AS permissive FOR UPDATE TO "authenticated" USING ((EXISTS ( SELECT 1
+   FROM sales s
+  WHERE ((s.id = sale_items.sale_id) AND ((s.operator_id = auth.uid()) OR is_admin(auth.uid()))))));
+CREATE POLICY "Admins delete sales" ON public."sales" AS permissive FOR DELETE TO "authenticated" USING (is_admin(auth.uid()));
+CREATE POLICY "Operators create sales" ON public."sales" AS permissive FOR INSERT TO PUBLIC WITH CHECK (((auth.uid() = operator_id) AND (is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role))));
+CREATE POLICY "Operators update own sales or admin" ON public."sales" AS permissive FOR UPDATE TO "authenticated" USING (((auth.uid() = operator_id) OR is_admin(auth.uid())));
+CREATE POLICY "Staff read sales" ON public."sales" AS permissive FOR SELECT TO "authenticated" USING ((is_admin(auth.uid()) OR has_role(auth.uid(), 'operator'::app_role)));
+CREATE POLICY "Store isolation" ON public."sales" AS restrictive FOR ALL TO "authenticated" USING (is_store_member(store_id)) WITH CHECK (is_store_member(store_id));
+CREATE POLICY "Members read store members" ON public."store_members" AS permissive FOR SELECT TO "authenticated" USING (is_store_member(store_id));
+CREATE POLICY "Admins manage store settings" ON public."store_settings" AS permissive FOR ALL TO "authenticated" USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
+CREATE POLICY "Admins read store settings" ON public."store_settings" AS permissive FOR SELECT TO "authenticated" USING (is_admin(auth.uid()));
+CREATE POLICY "Store isolation" ON public."store_settings" AS restrictive FOR ALL TO "authenticated" USING (is_store_member(store_id)) WITH CHECK (is_store_member(store_id));
+CREATE POLICY "Members read own stores" ON public."stores" AS permissive FOR SELECT TO "authenticated" USING (is_store_member(id));
+CREATE POLICY "Admins manage roles" ON public."user_roles" AS permissive FOR ALL TO "authenticated" USING (is_admin(auth.uid())) WITH CHECK (is_admin(auth.uid()));
+CREATE POLICY "Users see own roles" ON public."user_roles" AS permissive FOR SELECT TO "authenticated" USING (((auth.uid() = user_id) OR is_admin(auth.uid())));
