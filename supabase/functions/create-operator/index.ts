@@ -81,6 +81,17 @@ Deno.serve(async (req: Request) => {
       return response({ error: isLimit ? membershipInsertError.message : "Não foi possível vincular o operador à loja" }, isLimit ? 409 : 400);
     }
 
+    const { error: roleError } = await admin.from("user_roles").upsert(
+      { user_id: createdUserId, role: "operator" },
+      { onConflict: "user_id,role" },
+    );
+    if (roleError) {
+      await admin.from("store_members").delete().eq("store_id", storeId).eq("user_id", createdUserId);
+      await admin.auth.admin.deleteUser(createdUserId);
+      createdUserId = null;
+      return response({ error: "Não foi possível configurar as permissões do operador" }, 400);
+    }
+
     const { data: operator, error: operatorError } = await admin.from("store_operators").insert({
       store_id: storeId,
       user_id: createdUserId,
