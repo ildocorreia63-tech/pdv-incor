@@ -1,6 +1,7 @@
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useRef, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 /** Loja (assinante) à qual o usuário pertence. */
 export interface StoreInfo {
@@ -20,6 +21,7 @@ type AuthCtx = {
   session: Session | null;
   isAdmin: boolean;
   loading: boolean;
+  accessError: string | null;
   /** undefined = ainda carregando; null = usuário sem loja */
   store: StoreInfo | null | undefined;
   refreshStore: () => Promise<void>;
@@ -39,10 +41,12 @@ async function loadAccess(userId: string): Promise<{ isAdmin: boolean; store: St
       .limit(1)
       .maybeSingle(),
   ]);
+  if (roles.error) throw roles.error;
+  if (member.error) throw member.error;
   const s = member.data?.stores as Omit<StoreInfo, "memberRole"> | null | undefined;
   return {
-    isAdmin: !!roles.data?.some((r) => r.role === "admin"),
-    store: s ? { ...s, memberRole: member.data!.role as StoreInfo["memberRole"] } : null,
+    isAdmin: !!s && (member.data?.role === "owner" || member.data?.role === "admin"),
+    store: s && member.data ? { ...s, memberRole: member.data.role as StoreInfo["memberRole"] } : null,
   };
 }
 
@@ -52,46 +56,89 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [store, setStore] = useState<StoreInfo | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
+  const [accessError, setAccessError] = useState<string | null>(null);
+  const generation = useRef(0);
+  const queryClient = useQueryClient();
 
-  const apply = useCallback(async (u: User | null) => {
-    if (!u) {
-      setIsAdmin(false);
-      setStore(null);
-      return;
+  const hydrate = useCallback(async (nextSession: Session | null) => {
+    const version = ++generation.current;
+    setLoading(true);
+    setAccessError(null);
+    setIsAdmin(false);
+    setStore(undefined);
+    try {
+      if (!nextSession) {
+        setSession(null);
+        setUser(null);
+        setStore(null);
+        queryClient.clear();
+        return;
+      }
+      // Revalidate stored tokens with Auth, rather than trusting browser storage.
+      const { data, error } = await supabase.auth.getUser();
+      if (version !== generation.current) return;
+      if (error || !data.user) {
+        setSession(null);
+        setUser(null);
+        setStore(null);
+        return;
+      }
+      setSession(nextSession);
+      setUser(data.user);
+      const access = await loadAccess(data.user.id);
+      if (version !== generation.current) return;
+      setIsAdmin(access.isAdmin);
+      setStore(access.store);
+    } catch {
+      if (version === generation.current) {
+        setAccessError("Não foi possível verificar seu acesso à loja. Tente novamente.");
+        setStore(null);
+      }
+    } finally {
+      if (version === generation.current) setLoading(false);
     }
-    const access = await loadAccess(u.id);
-    setIsAdmin(access.isAdmin);
-    setStore(access.store);
-  }, []);
+  }, [queryClient]);
 
   useEffect(() => {
+    let alive = true;
+    const timers = new Set<ReturnType<typeof setTimeout>>();
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-      // adia para fora do callback (evita deadlock do supabase-js)
-      setTimeout(() => void apply(s?.user ?? null), 0);
+      setLoading(true);
+      // Defer Auth calls outside the listener to avoid the SDK's auth lock.
+      const timer = setTimeout(() => {
+        timers.delete(timer);
+        if (alive) void hydrate(s);
+      }, 0);
+      timers.add(timer);
     });
 
-    supabase.auth.getSession().then(async ({ data: { session: s } }) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-      await apply(s?.user ?? null);
-      setLoading(false);
+    void supabase.auth.getSession().then(({ data, error }) => {
+      if (alive) return hydrate(error ? null : data.session);
+    }).catch(() => {
+      if (alive) void hydrate(null);
     });
 
-    return () => sub.subscription.unsubscribe();
-  }, [apply]);
+    return () => {
+      alive = false;
+      generation.current++;
+      timers.forEach(clearTimeout);
+      sub.subscription.unsubscribe();
+    };
+  }, [hydrate]);
 
   const refreshStore = useCallback(async () => {
-    await apply(user);
-  }, [apply, user]);
+    const { data, error } = await supabase.auth.getSession();
+    await hydrate(error ? null : data.session);
+  }, [hydrate]);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    await hydrate(null);
   };
 
   return (
-    <Ctx.Provider value={{ user, session, isAdmin, loading, store, refreshStore, signOut }}>
+    <Ctx.Provider value={{ user, session, isAdmin, loading, accessError, store, refreshStore, signOut }}>
       {children}
     </Ctx.Provider>
   );
