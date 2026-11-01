@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/backendClient";
 import { maxUsersForPlan } from "@/lib/plans";
 import { formatBRL } from "@/lib/format";
 import { toast } from "sonner";

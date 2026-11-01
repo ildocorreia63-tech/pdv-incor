@@ -39,44 +39,52 @@ type Movement = {
 type SaleRow = { total: number; payment_method: string | null; created_at: string };
 type PaymentRow = { amount: number; method: string; sale_id: string | null; status: string; paid_at: string | null };
 
-async function fetchOpenSession(operatorId: string): Promise<Session | null> {
-  const { data } = await supabase
+async function fetchOpenSession(operatorId: string, storeId: string): Promise<Session | null> {
+  const { data, error } = await supabase
     .from("cash_registers")
     .select("*")
     .eq("status", "open")
     .eq("opened_by", operatorId)
+    .eq("store_id", storeId)
     .maybeSingle();
-  return (data as any) ?? null;
+  if (error) throw error;
+  return data as Session | null;
 }
 
 async function fetchMovements(sessionId: string): Promise<Movement[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("cash_movements")
     .select("*")
     .eq("cash_register_id", sessionId)
     .order("created_at", { ascending: true });
-  return ((data ?? []) as any[]).map((m) => ({ ...m, amount: Number(m.amount) }));
+  if (error) throw error;
+  return (data ?? []).map((m) => ({ ...m, type: m.type as Movement["type"], amount: Number(m.amount) }));
 }
 
-async function fetchSalesSince(iso: string, operatorId: string, untilIso?: string): Promise<SaleRow[]> {
-  let query = supabase.from("sales").select("id,created_at").eq("operator_id", operatorId).gte("created_at", iso);
+async function fetchSalesSince(iso: string, operatorId: string, storeId: string, untilIso?: string): Promise<SaleRow[]> {
+  let query = supabase.from("sales").select("id,created_at").eq("store_id", storeId).eq("operator_id", operatorId).neq("status", "cancelled").gte("created_at", iso);
   if (untilIso) query = query.lte("created_at", untilIso);
-  const { data: sales } = await query;
+  const { data: sales, error: salesError } = await query;
+  if (salesError) throw salesError;
   const ids = (sales ?? []).map((sale) => sale.id);
   if (ids.length === 0) return [];
-  const { data: payments } = await supabase
+  const { data: payments, error: paymentError } = await supabase
     .from("payments")
     .select("amount,method,sale_id,status,paid_at")
     .in("sale_id", ids)
+    .eq("store_id", storeId)
     .eq("status", "paid");
+  if (paymentError) throw paymentError;
   const saleTimes = new Map((sales ?? []).map((sale) => [sale.id, sale.created_at]));
   return ((payments ?? []) as PaymentRow[])
-    .filter((payment) => !!payment.sale_id && saleTimes.has(payment.sale_id))
-    .map((payment) => ({
+    .flatMap((payment) => {
+      const createdAt = payment.sale_id ? saleTimes.get(payment.sale_id) : undefined;
+      if (!createdAt) return [];
+      return [{
       total: Number(payment.amount),
       payment_method: payment.method,
-      created_at: saleTimes.get(payment.sale_id!)!,
-    }));
+      created_at: createdAt,
+    }]; });
 }
 
 function paymentBreakdown(sales: SaleRow[]) {
@@ -112,7 +120,8 @@ const paymentLabel: Record<string, string> = {
 };
 
 export function CashRegisterDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
-  const { user } = useAuth();
+  const { user, store } = useAuth();
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [movements, setMovements] = useState<Movement[]>([]);
   const [sales, setSales] = useState<SaleRow[]>([]);
@@ -134,21 +143,25 @@ export function CashRegisterDialog({ open, onOpenChange }: { open: boolean; onOp
 
   const load = async () => {
     setLoading(true);
-    if (!user?.id) { setSession(null); setLoading(false); return; }
-    const s = await fetchOpenSession(user.id);
+    setLoadError(null);
+    try {
+    if (!user?.id || !store?.id) { setSession(null); return; }
+    const s = await fetchOpenSession(user.id, store.id);
     setSession(s);
     if (s) {
-      const [mv, sl] = await Promise.all([fetchMovements(s.id), fetchSalesSince(s.opened_at, s.opened_by, s.closed_at ?? undefined)]);
+      const [mv, sl] = await Promise.all([fetchMovements(s.id), fetchSalesSince(s.opened_at, s.opened_by, store.id, s.closed_at ?? undefined)]);
       setMovements(mv);
       setSales(sl);
     } else {
       setMovements([]);
       setSales([]);
     }
-    setLoading(false);
+    } catch {
+      setLoadError("Não foi possível conferir o caixa. Nenhuma abertura ou fechamento será permitido até recarregar.");
+    } finally { setLoading(false); }
   };
 
-  useEffect(() => { if (open) void load(); }, [open, user?.id]);
+  useEffect(() => { if (open) void load(); }, [open, user?.id, store?.id]);
 
   const totals = useMemo(() => {
     const cashSales = sales.filter((s) => (s.payment_method || "").toLowerCase() === "cash")
@@ -162,9 +175,11 @@ export function CashRegisterDialog({ open, onOpenChange }: { open: boolean; onOp
   }, [session, movements, sales]);
 
   const openRegister = async () => {
+    if (loadError || !store?.id || !Number.isFinite(openAmount) || openAmount < 0) return toast.error("Confira o caixa e o valor inicial.");
     const { data: userRes } = await supabase.auth.getUser();
     if (!userRes.user) return toast.error("Faça login");
     const { error } = await supabase.from("cash_registers").insert({
+      store_id: store.id,
       opened_by: userRes.user.id,
       opening_amount: openAmount,
       opening_notes: openNotes || null,
@@ -177,11 +192,12 @@ export function CashRegisterDialog({ open, onOpenChange }: { open: boolean; onOp
   };
 
   const addMovement = async () => {
-    if (!session) return;
+    if (!session || loadError || !store?.id) return;
     if (!movAmount || movAmount <= 0) return toast.error("Valor inválido");
     const { data: userRes } = await supabase.auth.getUser();
     if (!userRes.user) return toast.error("Faça login");
     const { error } = await supabase.from("cash_movements").insert({
+      store_id: store.id,
       cash_register_id: session.id,
       type: movType,
       amount: movAmount,
@@ -195,21 +211,23 @@ export function CashRegisterDialog({ open, onOpenChange }: { open: boolean; onOp
   };
 
   const closeRegister = async () => {
-    if (!session) return;
+    if (!session || loadError || !store?.id || !Number.isFinite(closingAmount) || closingAmount < 0) return;
     setClosing(true);
     const diff = closingAmount - totals.expected;
     const { data: userRes } = await supabase.auth.getUser();
-    const { error } = await supabase.from("cash_registers").update({
+    if (!userRes.user || userRes.user.id !== session.opened_by) { setClosing(false); return toast.error("Entre como o operador deste caixa."); }
+    const { data: closed, error } = await supabase.from("cash_registers").update({
       status: "closed",
       closed_at: new Date().toISOString(),
-      closed_by: userRes.user?.id ?? null,
+      closed_by: userRes.user.id,
       closing_amount: closingAmount,
       expected_amount: totals.expected,
       difference: diff,
       closing_notes: closingNotes || null,
-    }).eq("id", session.id);
+    }).eq("id", session.id).eq("store_id", store.id).eq("opened_by", userRes.user.id).eq("status", "open").select("id").maybeSingle();
     setClosing(false);
     if (error) return toast.error("Erro ao fechar: " + error.message);
+    if (!closed) return toast.error("O caixa não foi fechado. Recarregue e confira seu acesso.");
     toast.success("Caixa fechado");
     printReport(closingHtml(session, totals, closingAmount, diff, closingNotes, movements, user?.user_metadata?.display_name || user?.email || session.opened_by));
     setClosingAmount(0); setClosingNotes("");
@@ -236,7 +254,7 @@ export function CashRegisterDialog({ open, onOpenChange }: { open: boolean; onOp
           </DialogDescription>
         </DialogHeader>
 
-        {loading ? (
+        {loadError ? <div role="alert" className="space-y-3 text-sm text-destructive"><p>{loadError}</p><Button variant="outline" onClick={() => void load()}>Tentar novamente</Button></div> : loading ? (
           <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin" /></div>
         ) : !session ? (
           <div className="space-y-3">
