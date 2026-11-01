@@ -1,5 +1,7 @@
 # Roadmap — Micro SaaS
 
+- [ ] Corrigir conexão externa, retorno do login, Equipe e caixa; validar sem modificar dados (aguarda variáveis do destino correto e endereço acessível)
+
 - [x] Base multi-loja: lojas, membros, separação de dados, 1980 como loja nº 1
 - [x] Cadastro da loja com teste grátis de 7 dias
 - [x] Página pública de planos (/planos)

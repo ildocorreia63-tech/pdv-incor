@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import { ThemeProvider } from "next-themes";
-import App from "./App.tsx";
+import { backendConfig } from "./lib/backendConfig";
 import "./index.css";
 import { friendlyMessage } from "./lib/errors";
 import { toast } from "sonner";
@@ -31,13 +31,26 @@ window.addEventListener("error", (event) => {
   console.error("[window.error]", event.error || event.message);
 });
 
-createRoot(document.getElementById("root")!).render(
-  <HelmetProvider>
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} storageKey="pdv-theme">
-      <App />
-    </ThemeProvider>
-  </HelmetProvider>,
-);
+const rootElement = document.getElementById("root");
+if (!rootElement) throw new Error("Elemento principal não encontrado");
+const root = createRoot(rootElement);
+if (!backendConfig.ok) {
+  root.render(
+    <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-6 text-center text-foreground">
+      <h1 className="font-display text-2xl">Conexão do PDV INCOR pendente</h1>
+      <p role="alert" className="max-w-lg text-sm text-muted-foreground">{backendConfig.error}</p>
+      <p className="max-w-lg text-sm text-muted-foreground">Nenhum acesso ao banco anterior será realizado.</p>
+    </main>,
+  );
+} else {
+  void import("./App.tsx").then(({ default: App }) => root.render(
+    <HelmetProvider>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} storageKey="pdv-theme">
+        <App />
+      </ThemeProvider>
+    </HelmetProvider>,
+  ));
+}
 
 // Fade out the boot splash once the app has mounted
 requestAnimationFrame(() => {

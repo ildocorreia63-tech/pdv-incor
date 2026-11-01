@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { requestedRoute } from "@/lib/authRedirect";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +15,9 @@ import { Seo } from "@/components/Seo";
 
 export default function Auth() {
   const nav = useNavigate();
+  const location = useLocation();
+  const { user, loading: authLoading } = useAuth();
+  const destination = requestedRoute(location.state);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,10 +26,8 @@ export default function Auth() {
 
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) nav("/", { replace: true });
-    });
-  }, [nav]);
+    if (!authLoading && user) nav(destination, { replace: true });
+  }, [nav, destination, authLoading, user]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +36,7 @@ export default function Auth() {
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Bem-vindo!");
-    nav("/", { replace: true });
+    // AuthProvider validates and hydrates the session before redirecting.
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -49,7 +52,7 @@ export default function Auth() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
-    toast.success("Conta criada! Você já pode entrar.");
+    toast.success("Conta criada! Confira seu e-mail para confirmar o acesso.");
   };
 
   const handleForgotPassword = async () => {

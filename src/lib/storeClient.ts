@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { backendConfig } from "./backendConfig";
 
 /**
  * Cliente anônimo do cardápio público de uma loja.
@@ -10,12 +11,13 @@ import type { Database } from "@/integrations/supabase/types";
 const cache = new Map<string, SupabaseClient<Database>>();
 
 export function getStoreClient(slug: string): SupabaseClient<Database> {
+  if (!backendConfig.ok) throw new Error(backendConfig.error);
   const key = slug.toLowerCase();
   const hit = cache.get(key);
   if (hit) return hit;
   const client = createClient<Database>(
-    import.meta.env.VITE_SUPABASE_URL,
-    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    backendConfig.url,
+    backendConfig.publishableKey,
     {
       auth: { persistSession: false, autoRefreshToken: false, storageKey: `menu-${key}` },
       global: { headers: { "x-store-slug": key } },
