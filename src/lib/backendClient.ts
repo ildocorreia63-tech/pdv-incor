@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./backendTypes";
 import { backendConfig } from "./backendConfig";
 
-if (!backendConfig.ok) throw new Error(backendConfig.error);
+if (backendConfig.ok === false) throw new Error(backendConfig.error);
 const config = backendConfig;
 
 /** Never use the Cloud preview session broker with an external project. */

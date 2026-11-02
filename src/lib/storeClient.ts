@@ -11,7 +11,7 @@ import { backendConfig } from "./backendConfig";
 const cache = new Map<string, SupabaseClient<Database>>();
 
 export function getStoreClient(slug: string): SupabaseClient<Database> {
-  if (!backendConfig.ok) throw new Error(backendConfig.error);
+  if (backendConfig.ok === false) throw new Error(backendConfig.error);
   const key = slug.toLowerCase();
   const hit = cache.get(key);
   if (hit) return hit;

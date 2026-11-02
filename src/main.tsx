@@ -34,7 +34,7 @@ window.addEventListener("error", (event) => {
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Elemento principal não encontrado");
 const root = createRoot(rootElement);
-if (!backendConfig.ok) {
+if (backendConfig.ok === false) {
   root.render(
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-6 text-center text-foreground">
       <h1 className="font-display text-2xl">Conexão do PDV INCOR pendente</h1>

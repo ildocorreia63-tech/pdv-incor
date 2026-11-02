@@ -36,8 +36,11 @@ export const PLANS: PlanDef[] = [
 ];
 
 /** Limite total de contas da loja; inclui o proprietário. */
-export const maxUsersForPlan = (plan: string): number | null =>
-  plan === "trial" ? 1 : PLANS.find((item) => item.id === plan)?.maxUsers ?? 1;
+export const maxUsersForPlan = (plan: string): number | null => {
+  if (plan === "trial") return 1;
+  const definition = PLANS.find((item) => item.id === plan);
+  return definition ? definition.maxUsers : 1;
+};
 
 /** Anual = 10x o mensal (2 meses grátis). */
 export const annualPrice = (monthly: number): number => monthly * 10;
