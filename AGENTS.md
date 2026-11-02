@@ -1,5 +1,5 @@
-- External auth uses standard project-scoped browser storage, never the Cloud preview session broker; never restore an old Cloud session into the external client.
-- Vite and Vitest redirect the generated client import to the app-owned validated backend client; generated files remain untouched and invalid environment configuration must block all database access before loading the app.
+- Auth uses the app-owned client with its own project-scoped browser storage key; never restore sessions from another backend into it.
+- Vite and Vitest redirect the generated client import to the app-owned validated backend client; generated files remain untouched and the client only accepts the Lovable Cloud backend host pinned in backendConfig.ts; any other address blocks database access before loading the app.
 - Multi-loja: toda tabela operacional tem `store_id` (default `current_store_id()`) e uma política RESTRICTIVE `is_store_member(store_id)`; novas tabelas devem seguir o mesmo padrão — garante isolamento entre lojas sem reescrever as políticas antigas.
 - Lojas são criadas só pela RPC `create_store` (valida link, cria membro dono e configurações) — evita inserts diretos inconsistentes.
 - Usuário logado sem loja é enviado a /criar-loja pelo ProtectedRoute — toda tela interna pressupõe uma loja ativa.

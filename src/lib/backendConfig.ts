@@ -1,4 +1,4 @@
-export const EXPECTED_BACKEND_HOST = "kuclsqujxdljazsxvxkn.supabase.co";
+export const EXPECTED_BACKEND_HOST = "riqjuxmdoyqmveieskty.supabase.co";
 
 export type BackendConfigResult =
   | { ok: true; url: string; publishableKey: string }
