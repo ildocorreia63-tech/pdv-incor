@@ -43,6 +43,13 @@
       "when": 1791830000000,
       "tag": "0005_operator_cash_register_isolation",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793799683558,
+      "tag": "0006_ensure_team_operators_shifts",
+      "breakpoints": true
     }
   ]
 }

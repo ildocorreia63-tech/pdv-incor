@@ -939,6 +939,47 @@ export type Database = {
           },
         ]
       }
+      store_operators: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string
+          display_name: string
+          email: string
+          id: string
+          store_id: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by: string
+          display_name: string
+          email: string
+          id?: string
+          store_id?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string
+          display_name?: string
+          email?: string
+          id?: string
+          store_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_operators_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       store_settings: {
         Row: {
           banner_enabled: boolean
@@ -1027,6 +1068,96 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "store_settings_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_shift_assignments: {
+        Row: {
+          created_at: string
+          id: string
+          operator_id: string
+          shift_id: string
+          store_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          operator_id: string
+          shift_id: string
+          store_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          operator_id?: string
+          shift_id?: string
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_shift_assignments_operator_id_store_id_fkey"
+            columns: ["operator_id", "store_id"]
+            isOneToOne: false
+            referencedRelation: "store_operators"
+            referencedColumns: ["id", "store_id"]
+          },
+          {
+            foreignKeyName: "store_shift_assignments_shift_id_store_id_fkey"
+            columns: ["shift_id", "store_id"]
+            isOneToOne: false
+            referencedRelation: "store_shifts"
+            referencedColumns: ["id", "store_id"]
+          },
+          {
+            foreignKeyName: "store_shift_assignments_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_shifts: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string
+          day_of_week: number
+          ends_at: string
+          id: string
+          name: string
+          starts_at: string
+          store_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by: string
+          day_of_week: number
+          ends_at: string
+          id?: string
+          name: string
+          starts_at: string
+          store_id?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string
+          day_of_week?: number
+          ends_at?: string
+          id?: string
+          name?: string
+          starts_at?: string
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_shifts_store_id_fkey"
             columns: ["store_id"]
             isOneToOne: false
             referencedRelation: "stores"
@@ -1174,6 +1305,7 @@ export type Database = {
       is_platform_admin: { Args: never; Returns: boolean }
       is_store_admin: { Args: { _store_id: string }; Returns: boolean }
       is_store_member: { Args: { _store_id: string }; Returns: boolean }
+      is_store_owner: { Args: { _store_id: string }; Returns: boolean }
       platform_list_stores: { Args: never; Returns: Json }
       platform_update_store: {
         Args: {
