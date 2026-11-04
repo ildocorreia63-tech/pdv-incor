@@ -152,8 +152,14 @@ export default function Equipe() {
 
   const manageOperator = async (operatorId: string, action: "remove" | "reset_password") => {
     if (!store?.id) return;
-    const password = action === "reset_password" ? window.prompt("Nova senha (mínimo de 8 caracteres):") : null;
-    if (action === "reset_password" && password === null) return;
+    const rawPassword = action === "reset_password" ? window.prompt("Nova senha (entre 8 e 72 caracteres):") : null;
+    if (action === "reset_password" && rawPassword === null) return;
+    const password = rawPassword !== null ? rawPassword.trim() : null;
+    // Validação local: evita chamar a função com senha inválida (retornaria 400).
+    if (action === "reset_password" && (password === null || password.length < 8 || password.length > 72)) {
+      toast.error("A senha deve ter entre 8 e 72 caracteres.");
+      return;
+    }
     if (action === "remove" && !window.confirm("Remover este operador? O acesso à loja será revogado e ele sairá da escala.")) return;
     setOperatorAction(operatorId);
     try {
