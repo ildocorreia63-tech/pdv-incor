@@ -116,7 +116,8 @@ function printReport(html: string) {
 
 const paymentLabel: Record<string, string> = {
   cash: "Dinheiro", pix: "PIX", card_delivery: "Cartão (entrega)",
-  credit: "Crédito", debit: "Débito", fiado: "Fiado", outros: "Outros",
+  credit: "Crédito", debit: "Débito", fiado: "Fiado",
+  meal_voucher: "Vale-refeição", credit_note: "Nota de crédito", outros: "Outros",
 };
 
 export function CashRegisterDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
@@ -329,6 +330,19 @@ export function CashRegisterDialog({ open, onOpenChange }: { open: boolean; onOp
             {/* Close */}
             <div className="space-y-2 border-t border-border pt-3">
               <p className="text-sm font-medium">Fechamento de caixa</p>
+              {Object.keys(totals.byPayment).length > 0 && (
+                <Card className="p-3 space-y-1 text-xs">
+                  <p className="text-sm font-medium mb-1">Vendas por forma de pagamento</p>
+                  {Object.entries(totals.byPayment)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([method, value]) => (
+                      <Row key={method} label={paymentLabel[method] || method} value={value} />
+                    ))}
+                  <div className="border-t border-border pt-1 mt-1">
+                    <Row label="Total vendas" value={totals.salesTotal} bold />
+                  </div>
+                </Card>
+              )}
               <div>
                 <Label className="text-xs">Valor contado em dinheiro (R$)</Label>
                 <Input type="number" step="0.01" min={0} value={closingAmount || ""} onChange={(e) => setClosingAmount(Number(e.target.value) || 0)} />
