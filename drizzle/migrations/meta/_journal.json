@@ -50,6 +50,13 @@
       "when": 1793799683558,
       "tag": "0006_ensure_team_operators_shifts",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793799720502,
+      "tag": "0007_ensure_operator_cash_isolation",
+      "breakpoints": true
     }
   ]
 }
