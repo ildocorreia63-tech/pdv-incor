@@ -96,10 +96,19 @@ function paymentBreakdown(sales: SaleRow[]) {
   return map;
 }
 
+/**
+ * Prints via a hidden iframe instead of window.open: popups opened after an
+ * await (save to database) are blocked by browsers, especially on mobile.
+ */
 function printReport(html: string) {
-  const w = window.open("", "_blank", "width=380,height=640");
-  if (!w) { toast.error("Bloqueado pelo navegador"); return; }
-  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Caixa</title>
+  const iframe = document.createElement("iframe");
+  iframe.setAttribute("aria-hidden", "true");
+  iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;";
+  document.body.appendChild(iframe);
+  const doc = iframe.contentWindow?.document;
+  if (!doc || !iframe.contentWindow) { iframe.remove(); toast.error("Não foi possível imprimir"); return; }
+  doc.open();
+  doc.write(`<!doctype html><html><head><meta charset="utf-8"><title>Caixa</title>
     <style>
       body{font-family:ui-monospace,Menlo,monospace;font-size:12px;padding:10px;color:#000}
       h1{font-size:14px;margin:4px 0;text-align:center}
@@ -110,8 +119,13 @@ function printReport(html: string) {
       .r{text-align:right}
       .b{font-weight:700}
       @media print{@page{margin:5mm}}
-    </style></head><body>${html}<script>window.onload=()=>{window.print();setTimeout(()=>window.close(),300)}<\/script></body></html>`);
-  w.document.close();
+    </style></head><body>${html}</body></html>`);
+  doc.close();
+  const win = iframe.contentWindow;
+  setTimeout(() => {
+    try { win.focus(); win.print(); } catch { toast.error("Não foi possível imprimir"); }
+    setTimeout(() => iframe.remove(), 60_000);
+  }, 250);
 }
 
 const paymentLabel: Record<string, string> = {
