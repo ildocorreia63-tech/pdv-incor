@@ -13,6 +13,7 @@ export type ReceiptData = {
   notes?: string | null;
   operatorName?: string | null;
   storeName?: string | null;
+  storeWhatsapp?: string | null;
 };
 
 const sanitizePhone = (p?: string | null) => (p ?? "").replace(/\D/g, "");
@@ -47,6 +48,7 @@ export const buildReceiptText = (r: ReceiptData) => {
   }
   lines.push("━━━━━━━━━━━━━━━━");
   lines.push("Obrigado pela preferência! 🍟");
+  if (r.storeWhatsapp?.trim()) lines.push(`📞 WhatsApp: ${r.storeWhatsapp.trim()}`);
   return lines.join("\n");
 };
 
@@ -129,7 +131,7 @@ export const printReceipt = (r: ReceiptData) => {
     ${paysHtml}
     ${r.notes ? `<hr><div>Obs: ${esc(r.notes)}</div>` : ""}
     <hr>
-    <div class="footer">Obrigado pela preferência!</div>
+    <div class="footer">Obrigado pela preferência!${r.storeWhatsapp?.trim() ? `<br>WhatsApp: ${esc(r.storeWhatsapp.trim())}` : ""}</div>
     <script>window.onload=()=>{window.print();}</script>
   </body></html>`);
   w.document.close();
