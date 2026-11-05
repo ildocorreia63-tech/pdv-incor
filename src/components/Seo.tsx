@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 
-const SITE_URL = "https://pdv1980burguer.lovable.app";
+const SITE_URL = "https://pdv-incor.lovable.app";
 
 export interface SeoProps {
   /** Título da página — manter abaixo de 60 caracteres. */

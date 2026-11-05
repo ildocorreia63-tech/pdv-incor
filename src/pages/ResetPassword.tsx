@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2, Eye, EyeOff, KeyRound } from "lucide-react";
-import logo from "@/assets/logo-1980.jpg";
+import logo from "@/assets/logo-pdv-incor.png";
 import { handleError } from "@/lib/errors";
 
 export default function ResetPassword() {
@@ -48,7 +48,7 @@ export default function ResetPassword() {
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center text-center">
           <div className="mb-3 h-20 w-20 overflow-hidden rounded-2xl ring-4 ring-primary/30 shadow-retro">
-            <img src={logo} alt="1980 Burguer" className="h-full w-full object-cover" />
+            <img src={logo} alt="PDV INCOR" className="h-full w-full object-contain" />
           </div>
           <h1 className="font-display text-3xl text-primary">Nova senha</h1>
           <p className="text-sm text-muted-foreground">Defina a senha que você usará daqui pra frente.</p>
