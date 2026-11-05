@@ -7,6 +7,8 @@ import { MessageCircle, Copy, Printer, Share2, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 type Props = {
   open: boolean;
@@ -17,9 +19,19 @@ type Props = {
 export const ReceiptDialog = ({ open, onOpenChange, receipt }: Props) => {
   const [copied, setCopied] = useState(false);
   const { store } = useAuth();
+  const { data: storeWhatsapp = null } = useQuery({
+    queryKey: ["store-whatsapp", store?.id],
+    enabled: !!store?.id,
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("store_settings").select("whatsapp_number").eq("store_id", store!.id).maybeSingle();
+      if (error) throw error;
+      return data?.whatsapp_number?.trim() || null;
+    },
+  });
   if (!receipt) return null;
   const storeName = receipt.storeName || store?.name || "PDV INCOR";
-  receipt = { ...receipt, storeName };
+  receipt = { ...receipt, storeName, storeWhatsapp: receipt.storeWhatsapp ?? storeWhatsapp };
   const text = buildReceiptText(receipt);
 
   const handleCopy = async () => {
