@@ -6,6 +6,7 @@ import { formatBRL, formatDate, paymentLabels } from "@/lib/format";
 import { MessageCircle, Copy, Printer, Share2, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Props = {
   open: boolean;
@@ -15,7 +16,10 @@ type Props = {
 
 export const ReceiptDialog = ({ open, onOpenChange, receipt }: Props) => {
   const [copied, setCopied] = useState(false);
+  const { store } = useAuth();
   if (!receipt) return null;
+  const storeName = receipt.storeName || store?.name || "PDV INCOR";
+  receipt = { ...receipt, storeName };
   const text = buildReceiptText(receipt);
 
   const handleCopy = async () => {
@@ -46,8 +50,7 @@ export const ReceiptDialog = ({ open, onOpenChange, receipt }: Props) => {
         </DialogHeader>
 
         <Card className="p-3 bg-muted/30 font-mono text-xs">
-          <p className="font-display text-base text-center text-primary">🍔 1980 BURGUER</p>
-          <p className="text-center text-[10px] text-muted-foreground mb-2">A sua hamburgueria</p>
+          <p className="font-display text-base text-center text-primary">🍔 {storeName.toUpperCase()}</p>
           <div className="border-t border-dashed border-border my-1" />
           <p>Pedido: #{receipt.saleId.slice(0, 8).toUpperCase()}</p>
           <p>{formatDate(receipt.createdAt)}</p>

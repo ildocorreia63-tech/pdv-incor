@@ -26,14 +26,17 @@ const storageKey = (year: number, month: number) => `birthday_invites_${year}_${
 
 const onlyDigits = (v?: string | null) => (v ?? "").replace(/\D/g, "");
 
+import { useAuth } from "@/contexts/AuthContext";
+
 export default function Aniversariantes() {
+  const { store } = useAuth();
   const today = new Date();
   const [month, setMonth] = useState(today.getMonth()); // 0-11
   const [rows, setRows] = useState<BirthdayCustomer[]>([]);
   const [loading, setLoading] = useState(true);
   const [sent, setSent] = useState<string[]>([]);
   const [message, setMessage] = useState(
-    "Olá {nome}! 🎉 A equipe do 1980 Burguer deseja um feliz aniversário! Vem comemorar com a gente — temos um mimo te esperando. 🍔",
+    "Olá {nome}! 🎉 A equipe da {loja} deseja um feliz aniversário! Vem comemorar com a gente — temos um mimo te esperando. 🍔",
   );
 
   const year = today.getFullYear();
@@ -104,7 +107,7 @@ export default function Aniversariantes() {
       toast.error("Cliente sem WhatsApp válido cadastrado");
       return;
     }
-    const text = message.replace(/\{nome\}/g, c.name.split(" ")[0] ?? c.name);
+    const text = message.replace(/\{nome\}/g, c.name.split(" ")[0] ?? c.name).replace(/\{loja\}/g, store?.name ?? "nossa loja");
     const target = phone.startsWith("55") ? phone : `55${phone}`;
     window.open(`https://wa.me/${target}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
     markSent(c.id);
@@ -154,7 +157,7 @@ export default function Aniversariantes() {
 
         <div className="rounded-lg border border-border bg-card p-3">
           <label className="text-xs uppercase tracking-wider text-muted-foreground">
-            Mensagem do convite (use {"{nome}"})
+            Mensagem do convite (use {"{nome}"} e {"{loja}"})
           </label>
           <Input className="mt-2" value={message} onChange={(e) => setMessage(e.target.value)} />
         </div>
