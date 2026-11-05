@@ -12,14 +12,14 @@ export type ReceiptData = {
   customerPhone?: string | null;
   notes?: string | null;
   operatorName?: string | null;
+  storeName?: string | null;
 };
 
 const sanitizePhone = (p?: string | null) => (p ?? "").replace(/\D/g, "");
 
 export const buildReceiptText = (r: ReceiptData) => {
   const lines: string[] = [];
-  lines.push("*🍔 1980 BURGUER*");
-  lines.push("_A sua hamburgueria_");
+  lines.push(`*🍔 ${(r.storeName || "PDV INCOR").toUpperCase()}*`);
   lines.push("━━━━━━━━━━━━━━━━");
   lines.push(`🧾 Pedido: #${r.saleId.slice(0, 8).toUpperCase()}`);
   lines.push(`🕒 ${formatDate(r.createdAt)}`);
@@ -47,7 +47,6 @@ export const buildReceiptText = (r: ReceiptData) => {
   }
   lines.push("━━━━━━━━━━━━━━━━");
   lines.push("Obrigado pela preferência! 🍟");
-  lines.push("📞 11 93924-3407 | @1980burguer");
   return lines.join("\n");
 };
 
@@ -71,7 +70,7 @@ export const copyToClipboard = async (text: string) => {
 export const shareReceipt = async (text: string) => {
   if (navigator.share) {
     try {
-      await navigator.share({ title: "Comprovante 1980 Burguer", text });
+      await navigator.share({ title: "Comprovante", text });
       return true;
     } catch {
       return false;
@@ -113,8 +112,7 @@ export const printReceipt = (r: ReceiptData) => {
     .total { font-size: 16px; font-weight: bold; text-align: right; }
     .footer { text-align: center; margin-top: 8px; font-size: 10px; }
   </style></head><body>
-    <h1>1980 BURGUER</h1>
-    <div class="sub">A sua hamburgueria</div>
+    <h1>${esc((r.storeName || "PDV INCOR").toUpperCase())}</h1>
     <hr>
     <div>Pedido: #${r.saleId.slice(0, 8).toUpperCase()}</div>
     <div>${formatDate(r.createdAt)}</div>
@@ -131,7 +129,7 @@ export const printReceipt = (r: ReceiptData) => {
     ${paysHtml}
     ${r.notes ? `<hr><div>Obs: ${esc(r.notes)}</div>` : ""}
     <hr>
-    <div class="footer">Obrigado pela preferência!<br>11 93924-3407 — @1980burguer</div>
+    <div class="footer">Obrigado pela preferência!</div>
     <script>window.onload=()=>{window.print();}</script>
   </body></html>`);
   w.document.close();
