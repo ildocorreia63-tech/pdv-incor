@@ -1,7 +1,7 @@
 {
-  "name": "1980 Burguer PDV",
-  "short_name": "1980 PDV",
-  "description": "Sistema PDV completo da 1980 Burguer: controle de vendas, fiado, despesas, delivery, cardápio digital e pagamentos Pix e cartão.",
+  "name": "PDV INCOR",
+  "short_name": "PDV INCOR",
+  "description": "PDV INCOR: sistema completo para hamburguerias: controle de vendas, fiado, despesas, delivery, cardápio digital e pagamentos Pix e cartão.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

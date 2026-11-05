@@ -1,4 +1,4 @@
-import defaultLogo from "@/assets/logo-1980.jpg";
+import defaultLogo from "@/assets/logo-pdv-incor.png";
 import { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ export const AppHeader = ({ title, action, subAction }: { title?: string; action
         </div>
         <div className="flex-1 min-w-0">
           <h1 className="font-display text-2xl leading-none text-foreground uppercase tracking-tight">
-            {title ?? "1980 Burguer"}
+            {title ?? "PDV INCOR"}
           </h1>
         </div>
         {action}

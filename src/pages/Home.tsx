@@ -249,15 +249,15 @@ export default function Home() {
   return (
     <AppShell title="Resumo">
       <Seo
-        title="Dashboard — 1980 Burguer PDV"
-        description="Painel da 1980 Burguer com vendas do dia, despesas, fiado, pedidos online e os produtos mais vendidos."
+        title="Dashboard — PDV INCOR"
+        description="Painel com vendas do dia, despesas, fiado, pedidos online e os produtos mais vendidos."
         path="/"
         noindex
       />
       <div className="mb-3 flex items-end justify-between gap-2">
         <div>
           <p className="text-xs uppercase tracking-widest text-muted-foreground">Dashboard</p>
-          <h1 className="font-display text-3xl">1980 Burguer — Dashboard</h1>
+          <h1 className="font-display text-3xl">Dashboard</h1>
         </div>
       </div>
 
