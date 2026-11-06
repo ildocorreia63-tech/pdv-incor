@@ -18,6 +18,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { DateRange } from "react-day-picker";
 import { usePersistentState } from "@/hooks/usePersistentState";
+import { ExpensePhotoInput } from "@/components/expenses/ExpensePhotoInput";
+import { photoToDraft, type ExpensePhotoResult } from "@/lib/expensePhoto";
 
 type Period = "today" | "7d" | "30d" | "all" | "custom";
 const periodLabel: Record<Period, string> = { today: "Hoje", "7d": "7d", "30d": "30d", all: "Tudo", custom: "Período" };
@@ -27,7 +29,7 @@ type Expense = { id: string; description: string; category: string | null; amoun
 const DEFAULT_CATEGORIES = ["Insumos", "Embalagens", "Aluguel", "Energia", "Água", "Internet", "Funcionários", "Marketing", "Outros"];
 
 export default function Despesas() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, store } = useAuth();
   const [categories, setCategories] = usePersistentState<string[]>("expense-categories", DEFAULT_CATEGORIES);
   const [list, setList] = useState<Expense[]>([]);
   const [open, setOpen] = useState(false);
@@ -46,6 +48,19 @@ export default function Despesas() {
   };
   const [date, setDate] = useState(localToday());
   const [notes, setNotes] = useState("");
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoReviewed, setPhotoReviewed] = useState(false);
+  const [photoWarnings, setPhotoWarnings] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+  const changeOpen = (value: boolean) => {
+    setOpen(value);
+    if (!value) { setPhotoBusy(false); setPhotoReviewed(false); setPhotoWarnings([]); }
+  };
+  const applyPhoto = (result: ExpensePhotoResult) => {
+    const draft = photoToDraft(result, categories);
+    setDesc(draft.description); setCat(draft.category); setAmount(draft.amount);
+    setDate(draft.date); setNotes(draft.notes); setPhotoWarnings(draft.warnings); setPhotoReviewed(true);
+  };
   const [period, setPeriod] = useState<Period>("30d");
   const [range, setRange] = useState<DateRange | undefined>();
 
@@ -82,9 +97,13 @@ export default function Despesas() {
 
 
   const save = async () => {
-    if (!user) return;
-    if (!desc.trim() || amount <= 0) return toast.error("Preencha descrição e valor");
+    if (!user || !store || saving || photoBusy) return;
+    if (photoReviewed && store.memberRole !== "owner") return toast.error("Somente o dono pode salvar a nota revisada.");
+    if (!desc.trim() || !Number.isFinite(amount) || amount <= 0 || !date) return toast.error("Preencha descrição, data e valor");
+    setSaving(true);
+    try {
     const { error } = await supabase.from("expenses").insert({
+      store_id: store.id,
       description: desc.trim(),
       category: cat,
       amount,
@@ -93,12 +112,14 @@ export default function Despesas() {
       created_by: user.id,
     });
     if (error) return toast.error(error.message);
-    setOpen(false);
+    changeOpen(false);
     setDesc("");
     setAmount(0);
     setNotes("");
     load();
     toast.success("Despesa registrada");
+    } catch { toast.error("Não foi possível salvar a despesa. Tente novamente."); }
+    finally { setSaving(false); }
   };
 
   const remove = async (id: string) => {
@@ -188,24 +209,31 @@ export default function Despesas() {
               </div>
             </DialogContent>
           </Dialog>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild><Button size="icon" variant="outline"><Plus className="h-4 w-4" /></Button></DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle>Nova despesa</DialogTitle></DialogHeader>
+          <Dialog open={open} onOpenChange={changeOpen}>
+            <DialogTrigger asChild><Button size="icon" variant="outline" aria-label="Nova despesa"><Plus className="h-4 w-4" /></Button></DialogTrigger>
+            <DialogContent className="max-h-[90dvh] overflow-y-auto">
+              <DialogHeader><DialogTitle>{photoReviewed ? "Conferir despesa da nota" : "Nova despesa"}</DialogTitle></DialogHeader>
+              {store?.memberRole === "owner" && <ExpensePhotoInput storeId={store.id} categories={categories} onResult={applyPhoto} onBusyChange={setPhotoBusy} />}
+              {photoReviewed && <div role="status" className="space-y-1 text-sm text-muted-foreground">
+                <p>Nota lida. Despesa ainda não salva.</p>
+                {photoWarnings.map((warning, index) => <p key={`${warning}-${index}`} className="break-words text-destructive">{warning}</p>)}
+              </div>}
               <div className="space-y-3">
-                <div><Label>Descrição</Label><Input value={desc} onChange={(e) => setDesc(e.target.value)} /></div>
+                <fieldset disabled={photoBusy || saving} className="space-y-3">
+                <div><Label htmlFor="expense-description">Descrição</Label><Input id="expense-description" value={desc} onChange={(e) => setDesc(e.target.value)} /></div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label>Categoria</Label>
-                    <select value={cat} onChange={(e) => setCat(e.target.value)} className="w-full h-10 rounded-md border border-input bg-background px-2 text-sm">
+                    <Label htmlFor="expense-category">Categoria</Label>
+                    <select id="expense-category" value={cat} onChange={(e) => setCat(e.target.value)} className="w-full h-10 rounded-md border border-input bg-background px-2 text-sm">
                       {categories.map((c) => <option key={c}>{c}</option>)}
                     </select>
                   </div>
-                  <div><Label>Data</Label><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+                  <div><Label htmlFor="expense-date">Data</Label><Input id="expense-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
                 </div>
-                <div><Label>Valor (R$)</Label><Input type="number" step="0.01" value={amount || ""} onChange={(e) => setAmount(Number(e.target.value) || 0)} /></div>
-                <div><Label>Observação</Label><Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} /></div>
-                <Button className="w-full" onClick={save}>Salvar</Button>
+                <div><Label htmlFor="expense-amount">Valor (R$)</Label><Input id="expense-amount" type="number" step="0.01" value={amount || ""} onChange={(e) => setAmount(Number(e.target.value) || 0)} /></div>
+                <div><Label htmlFor="expense-notes">Observação</Label><Textarea id="expense-notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} /></div>
+                <Button className="w-full" disabled={photoBusy || saving} onClick={save}>{saving ? "Salvando…" : photoReviewed ? "Conferi, salvar despesa" : "Salvar"}</Button>
+                </fieldset>
               </div>
             </DialogContent>
           </Dialog>

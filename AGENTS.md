@@ -5,3 +5,4 @@
 - Usuário logado sem loja é enviado a /criar-loja pelo ProtectedRoute — toda tela interna pressupõe uma loja ativa.
 - Cardápio público por loja: cliente anônimo separado (src/lib/storeClient.ts) envia o cabeçalho `x-store-slug`, lido por `current_store_id()` — o mesmo código do cardápio serve todas as lojas sem misturar dados.
 - Store settings are pinned in the header for store admins; `/admin?configuracoes=1` opens the existing settings dialog so mobile access never depends on scrolling the admin toolbar.
+- Receipt-photo extraction runs in an owner-authenticated Edge Function with request-local Gateway Responses helpers; it streams an editable draft without database writes, and the existing expense form saves only after explicit confirmation with its store ID.

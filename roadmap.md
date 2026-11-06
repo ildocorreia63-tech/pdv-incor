@@ -1,5 +1,7 @@
 # Roadmap — Micro SaaS
 
+- [ ] Foto de nota do fornecedor em Despesas: leitura pelo AI Gateway e revisão do dono antes de salvar.
+
 - [ ] Corrigir conexão externa, retorno do login, Equipe e caixa; validar sem modificar dados (aguarda variáveis do destino correto e endereço acessível)
 
 - [x] Base multi-loja: lojas, membros, separação de dados, 1980 como loja nº 1
