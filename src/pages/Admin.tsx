@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatBRL } from "@/lib/format";
 import { Plus, Pencil, Trash2, Tags, GripVertical, Truck, Settings as SettingsIcon, Upload, ImageIcon, Loader2, Clock, Boxes, ChartNoAxesCombined, Webhook, RotateCcw, AlertTriangle, CakeSlice, UsersRound, Megaphone, PackageOpen, ShoppingBasket, Copy, Share2, ExternalLink, Crown, Building2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { TooltipIconButton } from "@/components/TooltipIconButton";
 import { LockBadge } from "@/components/PlanGate";
 import { toast } from "sonner";
@@ -47,6 +47,7 @@ function SortableCategoryRow({ cat, count, onRemove }: { cat: Category & { items
 
 export default function Admin() {
   const { store } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const menuUrl = store ? `${window.location.origin}/loja/${store.slug}` : null;
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   useEffect(() => { supabase.rpc("is_platform_admin").then(({ data }) => setIsPlatformAdmin(data === true)); }, []);
@@ -170,6 +171,15 @@ export default function Admin() {
 
   // Store settings
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsVisible = settingsOpen || searchParams.get("configuracoes") === "1";
+  const changeSettingsOpen = (open: boolean) => {
+    setSettingsOpen(open);
+    if (!open && searchParams.has("configuracoes")) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("configuracoes");
+      setSearchParams(next, { replace: true });
+    }
+  };
   const [storeName, setStoreName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [welcome, setWelcome] = useState("");
@@ -505,6 +515,11 @@ export default function Admin() {
   return (
     <AppShell
       title="Painel Admin"
+      action={
+        <TooltipIconButton label="Configurações" onClick={() => changeSettingsOpen(true)}>
+          <SettingsIcon className="h-5 w-5" />
+        </TooltipIconButton>
+      }
       subAction={
         <>
           <Link to="/equipe">
@@ -558,9 +573,6 @@ export default function Admin() {
               <Crown className="h-5 w-5" />
             </TooltipIconButton>
           </Link>
-          <TooltipIconButton label="Configurações" onClick={() => setSettingsOpen(true)}>
-            <SettingsIcon className="h-5 w-5" />
-          </TooltipIconButton>
           <TooltipIconButton label="Produtos" ariaLabel="Adicionar produto" onClick={openNew}>
             <PackageOpen className="h-5 w-5" />
           </TooltipIconButton>
@@ -741,7 +753,7 @@ export default function Admin() {
       </Dialog>
 
       {/* Configurações da loja */}
-      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+      <Dialog open={settingsVisible} onOpenChange={changeSettingsOpen}>
         <DialogContent className="max-h-[90vh] flex flex-col p-0">
           <DialogHeader className="p-4 pb-2"><DialogTitle>Configurações do cardápio online</DialogTitle></DialogHeader>
           <div className="space-y-3 overflow-y-auto px-4 pb-4 flex-1">

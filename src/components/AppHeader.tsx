@@ -2,14 +2,14 @@ import defaultLogo from "@/assets/logo-pdv-incor.png";
 import { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { LogOut, ChartNoAxesCombined, UsersRound, CakeSlice, Boxes, ShoppingBasket, LayoutDashboard } from "lucide-react";
+import { LogOut, ChartNoAxesCombined, UsersRound, CakeSlice, Boxes, ShoppingBasket, LayoutDashboard, Settings } from "lucide-react";
 import { TooltipIconButton } from "@/components/TooltipIconButton";
 import { useStoreLogo } from "@/hooks/useStoreLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Link, useLocation } from "react-router-dom";
 
 export const AppHeader = ({ title, action, subAction }: { title?: string; action?: ReactNode; subAction?: ReactNode }) => {
-  const { signOut, user } = useAuth();
+  const { signOut, isAdmin } = useAuth();
   const storeLogo = useStoreLogo();
   const location = useLocation();
   return (
@@ -24,6 +24,13 @@ export const AppHeader = ({ title, action, subAction }: { title?: string; action
           </h1>
         </div>
         {action}
+        {isAdmin && !location.pathname.startsWith("/admin") && (
+          <Link to="/admin?configuracoes=1" className="shrink-0">
+            <TooltipIconButton label="Configurações">
+              <Settings className="h-5 w-5" />
+            </TooltipIconButton>
+          </Link>
+        )}
         <ThemeToggle />
         <Button size="icon" variant="ghost" onClick={signOut} aria-label="Sair">
           <LogOut className="h-4 w-4" />
