@@ -26,7 +26,7 @@ export const AppHeader = ({ title, action, subAction }: { title?: string; action
         </div>
         {action}
         {canManageStore && !location.pathname.startsWith("/admin") && (
-          <Link to="/admin?configuracoes=1" className="shrink-0">
+          <Link to="/admin?configuracoes=1" className="shrink-0" aria-label="Configurações">
             <TooltipIconButton label="Configurações">
               <Settings className="h-5 w-5" />
             </TooltipIconButton>
