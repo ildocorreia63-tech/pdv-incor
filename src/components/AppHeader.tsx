@@ -9,9 +9,10 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Link, useLocation } from "react-router-dom";
 
 export const AppHeader = ({ title, action, subAction }: { title?: string; action?: ReactNode; subAction?: ReactNode }) => {
-  const { signOut, isAdmin } = useAuth();
+  const { signOut, store } = useAuth();
   const storeLogo = useStoreLogo();
   const location = useLocation();
+  const canManageStore = store?.memberRole === "owner" || store?.memberRole === "admin";
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur-md">
       <div className="flex items-center gap-3 px-4 py-3">
