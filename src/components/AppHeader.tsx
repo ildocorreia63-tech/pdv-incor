@@ -25,7 +25,7 @@ export const AppHeader = ({ title, action, subAction }: { title?: string; action
           </h1>
         </div>
         {action}
-        {isAdmin && !location.pathname.startsWith("/admin") && (
+        {canManageStore && !location.pathname.startsWith("/admin") && (
           <Link to="/admin?configuracoes=1" className="shrink-0">
             <TooltipIconButton label="Configurações">
               <Settings className="h-5 w-5" />
