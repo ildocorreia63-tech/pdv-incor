@@ -39,7 +39,7 @@ export default function CriarLoja() {
     }
     await refreshStore();
     toast({ title: "Loja criada!", description: `Seu teste grátis de ${TRIAL_DAYS} dias começou.` });
-    navigate("/admin", { replace: true });
+    navigate("/admin?configuracoes=1", { replace: true });
   };
 
   return (
